@@ -1,0 +1,28 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&family=Open+Sans:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #C4A35A;
+  --color-secondary: #6B1C23;
+  --color-tertiary: #1E4D6B;
+  --color-background: #1A1714;
+  --color-surface: #2D241E;
+  --color-parchment: #F4E4BC;
+}
+
+body {
+  background-color: var(--color-background);
+  color: var(--color-parchment);
+  font-family: 'Open Sans', sans-serif;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Cinzel', serif;
+}
+
+.narrative-text {
+  font-family: 'Crimson Text', serif;
+}

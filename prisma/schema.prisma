@@ -1,0 +1,148 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Campaign {
+  id              String      @id @default(uuid())
+  name            String
+  description     String?
+  adventureModule String?     // JSON stored as string for SQLite
+  settings        String?     // JSON stored as string for SQLite
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  characters      Character[]
+  gameState       GameState?
+  sessions        Session[]
+}
+
+model Character {
+  id                       String   @id @default(uuid())
+  campaignId               String
+  campaign                 Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  name                     String
+  race                     String
+  className                String
+  subclass                 String?
+  level                    Int      @default(1)
+  background               String?
+  alignment                String?
+  strength                 Int      @default(10)
+  dexterity                Int      @default(10)
+  constitution             Int      @default(10)
+  intelligence             Int      @default(10)
+  wisdom                   Int      @default(10)
+  charisma                 Int      @default(10)
+  maxHp                    Int
+  currentHp                Int
+  tempHp                   Int      @default(0)
+  armorClass               Int      @default(10)
+  speed                    Int      @default(30)
+  hitDiceType              Int      @default(8)
+  hitDiceRemaining         Int      @default(1)
+  deathSaveSuccesses       Int      @default(0)
+  deathSaveFailures        Int      @default(0)
+  savingThrowProficiencies String   @default("[]")
+  skillProficiencies       String   @default("[]")
+  skillExpertise           String   @default("[]")
+  spellSlots               String   @default("{}")
+  knownSpells              String   @default("[]")
+  preparedSpells           String   @default("[]")
+  spellcastingAbility      String?
+  classResources           String   @default("[]")
+  inventory                String   @default("[]")
+  equippedItems            String   @default("{}")
+  gold                     Int      @default(0)
+  conditions               String   @default("[]")
+  features                 String   @default("[]")
+  backstory                String?
+  notes                    String?
+  createdAt                DateTime @default(now())
+  updatedAt                DateTime @updatedAt
+
+  @@index([campaignId])
+}
+
+model GameState {
+  id                String   @id @default(uuid())
+  campaignId        String   @unique
+  campaign          Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  mode              String   @default("exploration")
+  currentLocationId String?
+  exploredLocations String   @default("[]")
+  gameDay           Int      @default(1)
+  gameHour          Int      @default(8)
+  gameMinute        Int      @default(0)
+  activeCombat      String?  // JSON stored as string
+  activeMap         String?  // JSON stored as string - GameMap object
+  entityPositions   String   @default("{}") // JSON - Record<entityId, {x, y}>
+  flags             String   @default("{}")
+  activeQuests      String   @default("[]")
+  completedQuests   String   @default("[]")
+  knownNpcs         String   @default("[]")
+  recentMessages    String   @default("[]")
+  updatedAt         DateTime @updatedAt
+}
+
+model Location {
+  id                 String   @id @default(uuid())
+  campaignId         String
+  name               String
+  description        String?
+  locationType       String   @default("other") // dungeon, town, wilderness, building, cave
+  mapData            String?  // JSON stored as string - GameMap object
+  connectedLocations String   @default("[]") // JSON - Array of {locationId, direction, description}
+  npcsPresent        String   @default("[]")
+  isExplored         Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@index([campaignId])
+}
+
+model Session {
+  id            String    @id @default(uuid())
+  campaignId    String
+  campaign      Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  sessionNumber Int
+  startedAt     DateTime  @default(now())
+  endedAt       DateTime?
+  transcript    String    @default("[]")
+  summary       String?
+  stateSnapshot String?   // JSON stored as string
+
+  @@index([campaignId])
+}
+
+model UserSettings {
+  id            String   @id @default(uuid())
+  geminiApiKey  String?
+  theme         String   @default("dark")
+  fontSize      String   @default("medium")
+  diceAnimation Boolean  @default(true)
+  soundEnabled  Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model MonsterCache {
+  id        String   @id
+  name      String
+  data      String   // JSON stored as string
+  fetchedAt DateTime @default(now())
+
+  @@index([name])
+}
+
+model SpellCache {
+  id        String   @id
+  name      String
+  data      String   // JSON stored as string
+  fetchedAt DateTime @default(now())
+
+  @@index([name])
+}
