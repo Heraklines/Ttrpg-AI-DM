@@ -169,3 +169,135 @@ OPENROUTER_API_KEY="..."  # Fallback
 1. Create in `components/`
 2. Use Tailwind with theme colors
 3. Handle loading/error states
+
+---
+
+## Git & Version Control
+
+### Repository
+```
+Remote: https://github.com/Heraklines/Ttrpg-AI-DM.git
+Branch: main (primary)
+```
+
+### Quick Commands
+```bash
+git status                    # Check current state
+git diff                      # View unstaged changes
+git add -A                    # Stage all changes
+git commit -m "message"       # Commit with message
+git push origin main          # Push to remote
+git pull origin main          # Pull latest changes
+git log --oneline -10         # View recent commits
+```
+
+### Branching Strategy
+For new features or significant changes:
+```bash
+git checkout -b feature/feature-name    # Create feature branch
+# ... make changes ...
+git add -A && git commit -m "Add feature"
+git push -u origin feature/feature-name
+# Create Pull Request on GitHub, then merge to main
+```
+
+Branch naming conventions:
+- `feature/description` - New features
+- `fix/description` - Bug fixes
+- `refactor/description` - Code refactoring
+- `docs/description` - Documentation updates
+
+### Commit Message Guidelines
+Use clear, descriptive commit messages:
+
+```bash
+# Format: <type>: <short description>
+
+# Types:
+feat:     # New feature
+fix:      # Bug fix
+refactor: # Code refactoring (no functional change)
+docs:     # Documentation only
+style:    # Formatting, missing semicolons, etc.
+test:     # Adding or updating tests
+chore:    # Build process, dependencies, etc.
+
+# Examples:
+git commit -m "feat: Add campaign template system"
+git commit -m "fix: Resolve character inventory persistence bug"
+git commit -m "refactor: Extract dice rolling into separate module"
+git commit -m "docs: Update API documentation"
+```
+
+### Pre-Commit Checklist
+**ALWAYS run before committing:**
+```bash
+npm run build          # Verify no TypeScript errors
+npm run lint           # Check code style
+npm run test           # Run unit tests
+```
+
+**Review staged changes for secrets:**
+```bash
+git diff --cached      # Review ALL changes being committed
+```
+
+**Never commit:**
+- `.env` files (API keys, secrets)
+- `node_modules/`
+- `.next/` build output
+- `prisma/*.db` database files
+- IDE-specific settings (unless shared team config)
+
+### Common Workflows
+
+#### Starting Fresh Work
+```bash
+git pull origin main              # Get latest changes
+git checkout -b feature/my-work   # Create new branch
+```
+
+#### Daily Commit Flow
+```bash
+git status                        # See what changed
+npm run build                     # Verify no errors
+npm run test                      # Run tests
+git add -A                        # Stage changes
+git diff --cached                 # Review staged changes
+git commit -m "feat: Description" # Commit
+git push origin <branch>          # Push
+```
+
+#### Syncing with Main
+```bash
+git checkout main
+git pull origin main
+git checkout feature/my-branch
+git merge main                    # Or: git rebase main
+```
+
+#### Undoing Mistakes
+```bash
+git restore <file>                # Discard unstaged changes
+git restore --staged <file>       # Unstage a file
+git reset --soft HEAD~1           # Undo last commit, keep changes
+git reset --hard HEAD~1           # Undo last commit, discard changes (DANGER)
+```
+
+### Windows-Specific Notes
+If you encounter "dubious ownership" errors:
+```bash
+git config --global --add safe.directory C:/Users/<user>/Dnd_App
+```
+
+For line ending consistency:
+```bash
+git config --global core.autocrlf true
+```
+
+### Protected Files
+These files require extra care when modifying:
+- `lib/ai/system-prompt.ts` - Core AI behavior
+- `prisma/schema.prisma` - Database schema (requires migration)
+- `package.json` - Dependencies
+- `.env` - Never commit, never share
