@@ -1,0 +1,20 @@
+{
+  "enabled": true,
+  "name": "Sync Documentation",
+  "description": "Watches TypeScript source files (.ts, .tsx), Prisma schema, and config files for changes, then prompts the agent to update relevant documentation in README.md, ARCHITECTURE.md, DEVELOPMENT.md, or other doc files.",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "**/*.ts",
+      "**/*.tsx",
+      "prisma/schema.prisma",
+      "package.json",
+      "tsconfig.json"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "A source file has been modified. Review the changes and determine if any documentation needs to be updated. Check README.md, ARCHITECTURE.md, DEVELOPMENT.md, HANDOFF.md, and AGENTS.md for relevant sections that may need updates based on the code changes. If the changes affect APIs, architecture, setup instructions, or key functionality, update the appropriate documentation to keep it in sync with the code. Only make documentation changes if they are meaningful and necessary."
+  }
+}

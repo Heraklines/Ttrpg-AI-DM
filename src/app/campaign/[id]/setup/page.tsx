@@ -53,15 +53,12 @@ export default function CampaignSetupPage() {
       );
       setSelectedCharacters(existingIds);
 
-      // Load ALL characters that either belong to this campaign or have no campaign
+      // Load ALL characters (not just campaign-specific)
       const charsRes = await fetch('/api/character');
       if (charsRes.ok) {
         const charsData = await charsRes.json();
-        // Filter to show: characters in this campaign OR characters without a campaign
-        const available = charsData.filter(
-          (c: Character) => c.campaignId === campaignId || !c.campaignId
-        );
-        setAllCharacters(available);
+        const characters = charsData.characters || [];
+        setAllCharacters(characters);
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load');
@@ -130,8 +127,9 @@ export default function CampaignSetupPage() {
     );
   }
 
+  // Split characters into those in this campaign and available ones
   const charactersInCampaign = allCharacters.filter(c => c.campaignId === campaignId);
-  const availableCharacters = allCharacters.filter(c => !c.campaignId);
+  const availableCharacters = allCharacters.filter(c => c.campaignId !== campaignId);
 
   return (
     <main className="min-h-screen p-4 md:p-8">
@@ -183,7 +181,7 @@ export default function CampaignSetupPage() {
             </div>
           )}
 
-          {/* Available Characters */}
+          {/* Available Characters (from other campaigns or unassigned) */}
           {availableCharacters.length > 0 && (
             <div className="mb-6">
               <h3 className="text-parchment/80 font-semibold mb-3">Available Characters</h3>

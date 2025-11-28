@@ -1,26 +1,5 @@
 # Arcane Gamemaster - Visual Design Specification
 
-## Quick Reference for Asset Generator
-
-**Target Directory**: `C:\Users\micha\Dnd_App\public\`
-
-**Total Assets Required**: 105 files
-
-**Priority Order**:
-1. `public/logo/` - 3 files (logo, icon, favicon)
-2. `public/textures/` - 4 files (wood, parchment, leather, stone)
-3. `public/frames/` - 5 files (gold frames, scroll, initiative banner)
-4. `public/ornaments/` - 3 files (corners, divider)
-5. `public/icons/` - 56 files (dice, conditions, classes, actions, damage)
-6. `public/portraits/` - 18 files (races, monsters, default)
-7. `public/ui/` - 8 files (buttons, inputs, health bars)
-8. `public/effects/` - 4 files (glow, particles, mist, blood)
-9. `public/map/` - 5 files (tiles, token frames)
-
-**Style**: Dark fantasy, medieval, warm gold accents on dark wood backgrounds. Think candlelit tavern meets ancient grimoire.
-
----
-
 ## Design Philosophy
 
 The visual design should evoke the feeling of sitting at a candlelit table in a medieval tavern, with ancient tomes, weathered maps, and mystical artifacts. The UI should feel like a magical artifact itself - ornate but functional, mysterious but readable.

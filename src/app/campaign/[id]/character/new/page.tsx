@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -166,6 +166,10 @@ export default function CharacterCreationWizard() {
   const [step, setStep] = useState<Step>('basics');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState(false);
+  
+  // Ref to prevent double-click submissions (synchronous check)
+  const isSubmitting = useRef(false);
 
   // Form state
   const [name, setName] = useState('');
@@ -220,8 +224,13 @@ export default function CharacterCreationWizard() {
   }
 
   async function createCharacter() {
+    // Prevent double submission - check ref synchronously before any async operations
+    if (isSubmitting.current || saving) return;
+    isSubmitting.current = true;
+    
     if (!name.trim()) {
       setError('Please enter a character name');
+      isSubmitting.current = false;
       return;
     }
 
@@ -268,9 +277,15 @@ export default function CharacterCreationWizard() {
         throw new Error(data.error?.message || 'Failed to create character');
       }
 
-      router.push(`/campaign/${campaignId}`);
+      // Show success message briefly before navigating
+      setSuccess(true);
+      setTimeout(() => {
+        router.push(`/campaign/${campaignId}`);
+      }, 1500);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create character');
+      // Only reset ref on error so user can retry
+      isSubmitting.current = false;
     } finally {
       setSaving(false);
     }
@@ -319,6 +334,16 @@ export default function CharacterCreationWizard() {
             </div>
           ))}
         </div>
+
+        {success && (
+          <div className="bg-forest/20 border border-forest text-forest px-4 py-3 rounded-lg mb-6 flex items-center gap-3">
+            <span className="text-2xl">✓</span>
+            <div>
+              <div className="font-semibold">{name} has been created!</div>
+              <div className="text-sm opacity-80">Redirecting to adventure...</div>
+            </div>
+          </div>
+        )}
 
         {error && (
           <div className="bg-ember/20 border border-ember text-ember px-4 py-3 rounded-lg mb-6">

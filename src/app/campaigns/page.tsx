@@ -22,17 +22,30 @@ interface Campaign {
   characters: Character[];
 }
 
+interface CampaignTemplate {
+  id: string;
+  name: string;
+  description: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export default function CampaignsPage() {
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
+  const [templates, setTemplates] = useState<CampaignTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [newCampaignName, setNewCampaignName] = useState('');
   const [newCampaignDesc, setNewCampaignDesc] = useState('');
   const [creating, setCreating] = useState(false);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
+  const [saveAsTemplate, setSaveAsTemplate] = useState(false);
+  const [showTemplateManager, setShowTemplateManager] = useState(false);
 
   useEffect(() => {
     fetchCampaigns();
+    fetchTemplates();
   }, []);
 
   async function fetchCampaigns() {
@@ -50,12 +63,56 @@ export default function CampaignsPage() {
     }
   }
 
+  async function fetchTemplates() {
+    try {
+      const res = await fetch('/api/campaign-template');
+      const data = await res.json();
+      if (data.error) {
+        throw new Error(data.error.message);
+      }
+      setTemplates(data.templates || []);
+    } catch (err) {
+      console.error('Failed to load templates:', err);
+      // Don't set error state for templates - they're optional
+    }
+  }
+
+  function handleTemplateSelect(templateId: string) {
+    setSelectedTemplateId(templateId);
+    if (templateId) {
+      const template = templates.find((t) => t.id === templateId);
+      if (template) {
+        setNewCampaignName(template.name);
+        setNewCampaignDesc(template.description || '');
+      }
+    }
+  }
+
   async function createCampaign(e: React.FormEvent) {
     e.preventDefault();
     if (!newCampaignName.trim()) return;
 
     setCreating(true);
     try {
+      // If saveAsTemplate is checked, create the template first
+      if (saveAsTemplate) {
+        const templateRes = await fetch('/api/campaign-template', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: newCampaignName.trim(),
+            description: newCampaignDesc.trim() || undefined,
+          }),
+        });
+        const templateData = await templateRes.json();
+        if (templateData.error) {
+          throw new Error(templateData.error.message);
+        }
+        // Add the new template to the list
+        setTemplates([templateData.template, ...templates]);
+      }
+
+      // Create the campaign
       const res = await fetch('/api/campaign', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -71,6 +128,8 @@ export default function CampaignsPage() {
       setCampaigns([data.campaign, ...campaigns]);
       setNewCampaignName('');
       setNewCampaignDesc('');
+      setSelectedTemplateId('');
+      setSaveAsTemplate(false);
       setShowCreate(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create campaign');
@@ -96,6 +155,23 @@ export default function CampaignsPage() {
     }
   }
 
+  async function deleteTemplate(id: string) {
+    if (!confirm('Are you sure you want to delete this template? Existing campaigns will not be affected.')) {
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/campaign-template/${id}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.error) {
+        throw new Error(data.error.message);
+      }
+      setTemplates(templates.filter((t) => t.id !== id));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete template');
+    }
+  }
+
   if (loading) {
     return (
       <main className="min-h-screen p-8">
@@ -116,12 +192,20 @@ export default function CampaignsPage() {
             </Link>
             <h1 className="text-4xl font-medieval text-primary">Your Campaigns</h1>
           </div>
-          <button
-            onClick={() => setShowCreate(!showCreate)}
-            className="px-6 py-2 bg-primary text-background font-semibold rounded-lg hover:bg-primary-light transition-colors"
-          >
-            {showCreate ? 'Cancel' : 'New Campaign'}
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setShowTemplateManager(!showTemplateManager)}
+              className="px-4 py-2 border border-primary/30 text-primary rounded-lg hover:bg-primary/10 transition-colors"
+            >
+              {showTemplateManager ? 'Hide Templates' : 'Manage Templates'}
+            </button>
+            <button
+              onClick={() => setShowCreate(!showCreate)}
+              className="px-6 py-2 bg-primary text-background font-semibold rounded-lg hover:bg-primary-light transition-colors"
+            >
+              {showCreate ? 'Cancel' : 'New Campaign'}
+            </button>
+          </div>
         </div>
 
         {error && (
@@ -133,9 +217,64 @@ export default function CampaignsPage() {
           </div>
         )}
 
+        {/* Template Manager Section */}
+        {showTemplateManager && (
+          <div className="mb-8 p-6 bg-surface rounded-lg border border-primary/30">
+            <h2 className="text-2xl font-medieval text-primary mb-4">Campaign Templates</h2>
+            {templates.length === 0 ? (
+              <p className="text-parchment/60">No templates saved yet. Create a campaign and check &quot;Save as template&quot; to save it for reuse.</p>
+            ) : (
+              <div className="grid gap-3">
+                {templates.map((template) => (
+                  <div
+                    key={template.id}
+                    className="flex justify-between items-center p-4 bg-background rounded-lg border border-primary/20"
+                  >
+                    <div>
+                      <h3 className="text-lg font-semibold text-parchment">{template.name}</h3>
+                      {template.description && (
+                        <p className="text-sm text-parchment/60 mt-1">{template.description}</p>
+                      )}
+                    </div>
+                    <button
+                      onClick={() => deleteTemplate(template.id)}
+                      className="px-3 py-1 bg-ember/20 text-ember rounded hover:bg-ember/30 transition-colors text-sm"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         {showCreate && (
           <form onSubmit={createCampaign} className="mb-8 p-6 bg-surface rounded-lg border border-primary/30">
             <h2 className="text-2xl font-medieval text-primary mb-4">Create New Campaign</h2>
+            
+            {/* Template Selector */}
+            {templates.length > 0 && (
+              <div className="mb-4">
+                <label htmlFor="template" className="block text-parchment/80 mb-2">
+                  Start from Template (optional)
+                </label>
+                <select
+                  id="template"
+                  value={selectedTemplateId}
+                  onChange={(e) => handleTemplateSelect(e.target.value)}
+                  className="w-full px-4 py-2 bg-background border border-primary/30 rounded-lg text-parchment focus:outline-none focus:border-primary"
+                >
+                  <option value="">-- Select a template --</option>
+                  {templates.map((template) => (
+                    <option key={template.id} value={template.id}>
+                      {template.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             <div className="mb-4">
               <label htmlFor="name" className="block text-parchment/80 mb-2">
                 Campaign Name *
@@ -163,6 +302,20 @@ export default function CampaignsPage() {
                 rows={3}
               />
             </div>
+            
+            {/* Save as Template Checkbox */}
+            <div className="mb-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={saveAsTemplate}
+                  onChange={(e) => setSaveAsTemplate(e.target.checked)}
+                  className="w-4 h-4 rounded border-primary/30 bg-background text-primary focus:ring-primary"
+                />
+                <span className="text-parchment/80">Save this configuration as a template for future campaigns</span>
+              </label>
+            </div>
+
             <button
               type="submit"
               disabled={creating || !newCampaignName.trim()}

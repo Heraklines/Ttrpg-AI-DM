@@ -15,11 +15,77 @@
 
 body {
   background-color: var(--color-background);
+  background-image: url('/textures/dark-wood-bg.jpg');
+  background-blend-mode: overlay;
+  background-size: cover;
+  background-attachment: fixed;
   color: var(--color-parchment);
   font-family: 'Open Sans', sans-serif;
 }
 
-h1, h2, h3, h4, h5, h6 {
+/* Asset Handling Utilities */
+.blend-screen {
+  mix-blend-mode: screen;
+}
+
+.blend-multiply {
+  mix-blend-mode: multiply;
+}
+
+.blend-overlay {
+  mix-blend-mode: overlay;
+}
+
+/* Specific Component Styles */
+.parchment-card {
+  background-image: url('/textures/parchment.jpg');
+  background-size: cover;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.parchment-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('/frames/gold-frame-medium.png');
+  background-size: 100% 100%;
+  pointer-events: none;
+  /* If the frame has a black background, screen it */
+  mix-blend-mode: screen;
+}
+
+.btn-ornate {
+  background-image: url('/ui/button-primary.png');
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #F4E4BC;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  transition: filter 0.2s;
+}
+
+.btn-ornate:hover {
+  filter: brightness(1.2);
+}
+
+.btn-ornate:active {
+  filter: brightness(0.9);
+}
+
+.glow-text {
+  text-shadow: 0 0 10px var(--color-primary), 0 0 20px var(--color-primary);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: 'Cinzel', serif;
 }
 

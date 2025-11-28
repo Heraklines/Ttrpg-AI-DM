@@ -17,7 +17,7 @@ const InventoryItemSchema = z.object({
 });
 
 const CreateCharacterSchema = z.object({
-  campaignId: z.string().uuid(),
+  campaignId: z.string().uuid().optional(),
   name: z.string().min(1).max(100),
   race: z.string().min(1).max(50),
   className: z.string().min(1).max(50),
@@ -50,16 +50,12 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const campaignId = searchParams.get('campaignId');
 
-    if (!campaignId) {
-      return NextResponse.json(
-        { error: { code: 'VALIDATION_FAILED', message: 'campaignId is required' } },
-        { status: 422 }
-      );
-    }
+    // If campaignId provided, filter by it; otherwise return ALL characters
+    const whereClause = campaignId ? { campaignId } : {};
 
     const characters = await prisma.character.findMany({
-      where: { campaignId },
-      orderBy: { createdAt: 'asc' },
+      where: whereClause,
+      orderBy: { createdAt: 'desc' },
     });
 
     return NextResponse.json({ characters });
@@ -84,20 +80,23 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const campaign = await prisma.campaign.findUnique({
-      where: { id: parsed.data.campaignId },
-    });
+    // If campaignId provided, verify it exists
+    if (parsed.data.campaignId) {
+      const campaign = await prisma.campaign.findUnique({
+        where: { id: parsed.data.campaignId },
+      });
 
-    if (!campaign) {
-      return NextResponse.json(
-        { error: { code: 'NOT_FOUND', message: 'Campaign not found' } },
-        { status: 404 }
-      );
+      if (!campaign) {
+        return NextResponse.json(
+          { error: { code: 'NOT_FOUND', message: 'Campaign not found' } },
+          { status: 404 }
+        );
+      }
     }
 
     const character = await prisma.character.create({
       data: {
-        campaignId: parsed.data.campaignId,
+        campaignId: parsed.data.campaignId || null,
         name: parsed.data.name,
         race: parsed.data.race,
         className: parsed.data.className,
