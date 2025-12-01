@@ -1,6 +1,8 @@
 # Implementation Plan
 
-- [x] 1. Fix double-click character creation bug
+## ✅ COMPLETED PHASES
+
+- [x] 1. Fix double-click character creation bug (COMPLETED)
 
 
 
@@ -132,10 +134,94 @@
     - **Validates: Requirements 3.2**
 -
 
-- [x] 7. Final Checkpoint - Verify all functionality
+- [x] 7. Final Checkpoint - Verify all functionality (COMPLETED)
 
 
 
 
   - Ensure all tests pass, ask the user if questions arise.
+
+---
+
+## 🚧 PHASE 2: Campaign World Lore Generation System
+
+### Overview
+When a player finishes describing their campaign setting, the system should automatically generate rich world lore, conflicts, NPCs, geography, and narrative hooks in the background. This generated content should be stored in a campaign-specific database and intelligently injected into the AI context during gameplay.
+
+- [ ] 8. Design and implement CampaignLore database schema
+
+
+
+  - [ ] 8.1 Add CampaignLore model to Prisma schema
+    - Fields: id, campaignId (FK unique), generationStatus, worldHistory, factions, keyNpcs, conflicts, geography, secrets, generatedAt
+    - Establish 1:1 relationship with Campaign
+    - Add indexes for efficient querying
+
+  - [ ] 8.2 Add LoreNpc model for detailed NPC storage
+    - Fields: id, campaignLoreId (FK), name, role, personality, motivations, secrets, relationships, location, appearance
+    
+  - [ ] 8.3 Add LoreFaction model for faction tracking
+    - Fields: id, campaignLoreId (FK), name, type, goals, resources, relationships, territory, influence
+
+  - [ ] 8.4 Add LoreLocation model for geography
+    - Fields: id, campaignLoreId (FK), name, locationType, description, significance, connectedLocations, secrets
+
+  - [ ] 8.5 Add LoreConflict model for narrative tension tracking
+    - Fields: id, campaignLoreId (FK), name, type, participants, stakes, currentState, possibleResolutions
+
+- [ ] 9. Create async background lore generation service
+
+
+
+  - [ ] 9.1 Create LoreGenerationQueue system
+    - Implement job queue with status tracking (pending, processing, completed, failed)
+    - Add retry logic with exponential backoff
+    - Implement idempotency to prevent duplicate generation
+
+  - [ ] 9.2 Create LoreGenerationService class
+    - Implement multi-phase generation (world history → factions → NPCs → conflicts → geography)
+    - Add structured prompts for each generation phase
+    - Implement validation of generated content
+
+  - [ ] 9.3 Create POST /api/campaign/[id]/generate-lore endpoint
+    - Trigger async generation after campaign creation
+    - Return job ID for status polling
+    
+  - [ ] 9.4 Create GET /api/campaign/[id]/lore-status endpoint
+    - Return generation progress and partial results
+
+- [ ] 10. Implement intelligent context injection strategy
+
+
+
+  - [ ] 10.1 Create LoreContextManager class
+    - Implement relevance scoring based on current location, NPCs mentioned, active conflicts
+    - Create tiered injection (always-present, situational, on-demand)
+    - Implement token budget management
+
+  - [ ] 10.2 Integrate with StateGuardian
+    - Modify generateContextInjection() to include relevant lore
+    - Add lore summary to campaign intro generation
+    - Create lore-aware location inference
+
+  - [ ] 10.3 Create lore-specific AI functions
+    - Add recall_lore(topic) function for AI to query lore database
+    - Add reveal_secret(secret_id) function for dramatic reveals
+    - Add introduce_npc(npc_id) function with full personality context
+
+- [ ] 11. Create lore management UI
+
+
+
+  - [ ] 11.1 Add lore generation progress indicator to campaign page
+  - [ ] 11.2 Create lore browser/viewer component
+  - [ ] 11.3 Add manual lore editing capability
+
+- [ ] 12. Testing and validation
+
+
+
+  - [ ] 12.1 Write unit tests for LoreGenerationService
+  - [ ] 12.2 Write integration tests for context injection
+  - [ ] 12.3 Write property tests for lore consistency
 

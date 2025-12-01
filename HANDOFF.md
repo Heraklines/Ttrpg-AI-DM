@@ -190,40 +190,56 @@ Parsed by regex in `function-executor.ts` → `parseFunctionCalls()`
 
 ## What Needs Work / Known Issues
 
-### HIGH PRIORITY
+### HIGH PRIORITY - NEXT FEATURE
 
-1. **Inventory Display Bug** - Items may not show correctly in adventure screen. Check:
+1. **Campaign World Lore Generation System** (DESIGN COMPLETE - READY FOR IMPLEMENTATION)
+   - Full specification in `/.kiro/specs/campaign-lore-generation/design.md`
+   - When player finishes campaign description, auto-generate:
+     - World history, cosmology, tone, themes
+     - Factions (5-8) with goals, methods, relationships
+     - NPCs (10-15) with personalities, motivations, secrets
+     - Conflicts (4-6) with stakes, participants, resolutions
+     - Locations (10-15) with descriptions, connections, atmosphere
+     - Secrets (8-12) with hints, discovery conditions, impact
+   - Stored in campaign-specific database (CampaignLore 1:1 with Campaign)
+   - Context injection with tiered relevance scoring
+   - New AI functions: `recall_lore`, `reveal_secret`, `introduce_npc`, `discover_location`
+
+### EXISTING ISSUES
+
+2. **Inventory Display Bug** - Items may not show correctly in adventure screen. Check:
    - Is `character.inventory` being parsed correctly? (It's stored as JSON string)
    - Is the API returning updated inventory after `modify_inventory`?
    - Test: Create character → Check inventory tab → Should see class + background items
 
-2. **AI Sometimes Doesn't Narrate** - The orchestrator has a fallback (line ~142 in `orchestrator.ts`) but it may need tuning
+3. **AI Sometimes Doesn't Narrate** - The orchestrator has a fallback (line ~142 in `orchestrator.ts`) but it may need tuning
 
-3. **Location Inference** - `inferCurrentLocation()` in state-guardian is basic. Could be improved with:
-   - Storing explicit `currentLocation` in GameState
-   - Having AI call a `set_location()` function when party moves
+4. **Location Inference** - `inferCurrentLocation()` in state-guardian is basic. Will be enhanced by Lore System with:
+   - Explicit `currentLocation` tracking in GameState
+   - AI calls `set_location()` function when party moves
+   - Location lore provides rich context
 
 ### MEDIUM PRIORITY
 
-4. **MiniMap Component** - `components/mini-map.tsx` exists but not integrated into adventure screen. Needs:
+5. **MiniMap Component** - `components/mini-map.tsx` exists but not integrated into adventure screen. Needs:
    - Canvas rendering
    - Entity positions
    - Click-to-move interaction
 
-5. **Spell System** - Basic slots exist but no spell lookup/casting flow. Files exist:
+6. **Spell System** - Basic slots exist but no spell lookup/casting flow. Files exist:
    - `/api/rules/spells` - Fetches from D&D 5e API
    - Need UI for spell selection and AI integration
 
-6. **Equipment/Armor** - No equipped items UI. Data structure exists (`equippedItems` in Character)
+7. **Equipment/Armor** - No equipped items UI. Data structure exists (`equippedItems` in Character)
 
-7. **Long Rest / Short Rest** - Hit dice recovery partially implemented
+8. **Long Rest / Short Rest** - Hit dice recovery partially implemented
 
 ### LOW PRIORITY
 
-8. **Streaming** - `/api/adventure/action/stream` exists but not used in UI
-9. **Sound System** - Not implemented
-10. **PDF Import** - Not implemented
-11. **Rate Limiting** - No API protection
+9. **Streaming** - `/api/adventure/action/stream` exists but not used in UI
+10. **Sound System** - Not implemented
+11. **PDF Import** - Not implemented
+12. **Rate Limiting** - No API protection
 
 ---
 
@@ -364,3 +380,130 @@ Use `Array.from()` instead of spread operator on Sets/Maps
 5. The adventure page (`/campaign/[id]/page.tsx`) is the most important UI file
 
 Good luck! The core systems are solid - it's mostly about polish, edge cases, and UI improvements now.
+
+---
+
+## UPCOMING: Campaign World Lore Generation System
+
+### Overview
+
+The next major feature is an **asynchronous world lore generation system** that automatically creates rich campaign content when a player finishes describing their setting. Full design specification is in `/.kiro/specs/campaign-lore-generation/design.md`.
+
+### Architecture
+
+```
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                        CAMPAIGN CREATION FLOW                                  │
+│                                                                                │
+│  Player completes       POST /api/campaign          LoreGenerationQueue       │
+│  campaign description ─────────────────────────→ enqueues job with campaignId │
+│                                                           │                   │
+│                                                           ▼                   │
+│                              ┌─────────────────────────────────────────┐      │
+│                              │      LoreGenerationService              │      │
+│                              │                                         │      │
+│                              │  Phase 1: World History & Cosmology     │      │
+│                              │  Phase 2: Factions & Power Structures   │      │
+│                              │  Phase 3: Key NPCs & Personalities      │      │
+│                              │  Phase 4: Conflicts & Tensions          │      │
+│                              │  Phase 5: Geography & Locations         │      │
+│                              │  Phase 6: Secrets & Plot Hooks          │      │
+│                              └─────────────────────────────────────────┘      │
+│                                                           │                   │
+│                                                           ▼                   │
+│                              ┌─────────────────────────────────────────┐      │
+│                              │         CampaignLore Database           │      │
+│                              │  (1:1 with Campaign, stores all lore)   │      │
+│                              └─────────────────────────────────────────┘      │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
+
+### New Database Models
+
+```prisma
+model CampaignLore {
+  id                String   @id @default(uuid())
+  campaignId        String   @unique
+  campaign          Campaign @relation(...)
+  generationStatus  String   @default("pending") // pending, generating, completed, failed
+  worldName         String?
+  tone              String?  // dark, heroic, comedic, etc.
+  themes            String   @default("[]")
+  cosmology         String   @default("{}")
+  worldHistory      String   @default("[]")
+  npcs              LoreNpc[]
+  factions          LoreFaction[]
+  locations         LoreLocation[]
+  conflicts         LoreConflict[]
+  secrets           LoreSecret[]
+}
+
+model LoreNpc {
+  name, role, importance, personality, publicGoal, secretGoal, 
+  relationships, factionId, primaryLocation, isRevealed
+}
+
+model LoreFaction {
+  name, type, importance, goals, methods, resources, allies, enemies,
+  headquarters, influence, playerStanding
+}
+
+model LoreLocation {
+  name, locationType, importance, description, atmosphere, sensoryDetails,
+  region, terrain, connectedTo, factionPresence, isDiscovered
+}
+
+model LoreConflict {
+  name, type, scope, importance, participants, stakes, 
+  publicKnowledge, trueNature, currentState, isRevealed
+}
+
+model LoreSecret {
+  name, type, importance, content, hints, relatedNpcs, relatedFactions,
+  discoveryConditions, revealImpact, isRevealed
+}
+```
+
+### Context Injection Strategy
+
+**Tiered Injection Model:**
+- **Tier 1 (Always ~100-150 tokens)**: World name, tone, current location, main conflict
+- **Tier 2 (Situational ~200-400 tokens)**: NPCs at current location, local conflicts, recent mentions
+- **Tier 3 (On-demand via functions)**: Deep history, distant locations, unrevealed secrets
+
+**Relevance Scoring:**
+- At current location: +10 points
+- Recently mentioned: +8 points
+- Major importance: +5 points
+- Already revealed: +2 points
+
+### New AI Functions
+
+| Function | Purpose |
+|----------|---------|
+| `recall_lore(topic, type?)` | Query world lore database for information |
+| `reveal_secret(secret_name, context)` | Mark secret as revealed, return full content |
+| `introduce_npc(npc_name, type)` | Mark NPC as revealed, return personality details |
+| `discover_location(location_name, method)` | Mark location discovered, return description |
+
+### Implementation Files to Create
+
+```
+src/lib/lore/
+├── lore-generation-queue.ts    # Job queue with idempotency
+├── lore-generation-service.ts  # 6-phase generation orchestrator
+└── lore-context-manager.ts     # Tiered context injection
+
+src/app/api/campaign/[id]/
+├── generate-lore/route.ts      # POST - trigger generation
+├── lore-status/route.ts        # GET - check status
+└── lore/route.ts               # POST - query lore
+```
+
+### Key Design Decisions
+
+1. **Non-blocking Generation**: Players can start playing immediately while lore generates
+2. **Idempotent Operations**: Multiple triggers for same campaign return existing job
+3. **Phase Skip Logic**: Failed generation preserves partial progress, resumes from last complete phase
+4. **Token Budget Management**: Relevance scoring ensures important lore fits within limits
+5. **Campaign Isolation**: All lore strictly scoped to its campaign via foreign keys
