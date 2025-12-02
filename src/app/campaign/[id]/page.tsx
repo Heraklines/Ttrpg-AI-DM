@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { MiniMap } from '@/components/mini-map';
@@ -68,6 +68,16 @@ interface Message {
   diceRolls?: DiceRoll[];
 }
 
+type LoreStatus =
+  | {
+      status: 'pending' | 'generating' | 'completed' | 'failed' | 'not_started';
+      phase?: string;
+      error?: string;
+      startedAt?: string;
+      completedAt?: string;
+    }
+  | null;
+
 export default function AdventurePage() {
   const params = useParams();
   const router = useRouter();
@@ -79,6 +89,9 @@ export default function AdventurePage() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [loreStatus, setLoreStatus] = useState<LoreStatus>(null);
+  const [hideLoreBanner, setHideLoreBanner] = useState(false);
+  const [showLoreToast, setShowLoreToast] = useState(false);
   
   // UI State
   const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
@@ -89,23 +102,28 @@ export default function AdventurePage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    fetchCampaign();
+  const fetchLoreStatus = useCallback(async () => {
+    try {
+      const res = await fetch(`/api/campaign/${campaignId}/lore-status`);
+      if (!res.ok) return null;
+      const data = await res.json();
+      setLoreStatus((prev) => {
+        const wasGenerating = prev?.status === 'generating';
+        const isNowComplete = data?.status === 'completed';
+        if (wasGenerating && isNowComplete) {
+          setShowLoreToast(true);
+          setTimeout(() => setShowLoreToast(false), 4000);
+        }
+        return data;
+      });
+      return data as LoreStatus;
+    } catch (err) {
+      console.error('Failed to fetch lore status', err);
+      return null;
+    }
   }, [campaignId]);
 
-  useEffect(() => {
-    if (messagesContainerRef.current) {
-      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
-    }
-  }, [messages]);
-
-  useEffect(() => {
-    if (campaign?.characters.length && !selectedCharacterId) {
-      setSelectedCharacterId(campaign.characters[0].id);
-    }
-  }, [campaign, selectedCharacterId]);
-
-  async function fetchCampaign() {
+  const fetchCampaign = useCallback(async () => {
     try {
       const res = await fetch(`/api/campaign/${campaignId}`);
       if (!res.ok) {
@@ -172,7 +190,42 @@ export default function AdventurePage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [campaignId, router]);
+
+  useEffect(() => {
+    fetchCampaign();
+    fetchLoreStatus();
+
+    let intervalId: number | undefined;
+
+    const poll = async () => {
+      const status = await fetchLoreStatus();
+      if (!status) return;
+      if (status.status === 'completed' || status.status === 'failed') {
+        if (intervalId) {
+          clearInterval(intervalId);
+        }
+      }
+    };
+
+    intervalId = window.setInterval(poll, 5000);
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [fetchCampaign, fetchLoreStatus]);
+
+  useEffect(() => {
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  useEffect(() => {
+    if (campaign?.characters.length && !selectedCharacterId) {
+      setSelectedCharacterId(campaign.characters[0].id);
+    }
+  }, [campaign, selectedCharacterId]);
 
   async function sendMessage(e: React.FormEvent) {
     e.preventDefault();
@@ -286,6 +339,22 @@ export default function AdventurePage() {
   const hour = gameState.gameHour;
   const timeIcon = hour >= 6 && hour < 18 ? '☀️' : '🌙';
   const timeStr = `${hour % 12 || 12}:${String(gameState.gameMinute).padStart(2, '0')} ${hour >= 12 ? 'PM' : 'AM'}`;
+  const phaseOrder = ['tensions', 'cosmology', 'factions', 'npcs', 'conflicts', 'locations', 'secrets', 'coherence'];
+  const phaseLabels: Record<string, string> = {
+    tensions: 'Extracting Tensions',
+    cosmology: 'Forging Cosmology',
+    factions: 'Generating Factions',
+    npcs: 'Populating NPCs',
+    conflicts: 'Charting Conflicts',
+    locations: 'Mapping Locations',
+    secrets: 'Weaving Secrets',
+    coherence: 'Checking Coherence',
+  };
+  const phaseIndex = loreStatus?.phase ? phaseOrder.indexOf(loreStatus.phase) : -1;
+  const phaseText = loreStatus?.phase ? (phaseLabels[loreStatus.phase] || loreStatus.phase) : 'Queued';
+  const phaseProgress = phaseIndex >= 0 ? `${phaseIndex + 1}/${phaseOrder.length}` : '—';
+  const showLoreBanner = !!loreStatus && !hideLoreBanner && loreStatus.status !== 'completed' && loreStatus.status !== 'not_started';
+  const loreIsFailed = loreStatus?.status === 'failed';
 
   return (
     <main className="h-screen flex flex-col bg-[#0d0d0d] text-gray-100 overflow-hidden">
@@ -344,16 +413,62 @@ export default function AdventurePage() {
           </button>
           <Link 
             href={`/campaign/${campaignId}/lore`} 
-            className="p-1.5 text-gray-500 hover:text-amber-400 transition-colors" 
+            className="px-3 py-1.5 rounded border border-amber-700/40 bg-amber-900/30 text-amber-200 hover:bg-amber-900/50 transition-colors" 
             title="World Lore"
           >
-            📜
+            Lore
           </Link>
           <Link href={`/campaign/${campaignId}/settings`} className="p-1.5 text-gray-500 hover:text-gray-300" title="Settings">
             ⚙️
           </Link>
         </div>
       </header>
+
+      {showLoreBanner && (
+        <div
+          className={`px-4 py-3 border-b ${
+            loreIsFailed
+              ? 'bg-red-900/30 border-red-700/60 text-red-100'
+              : 'bg-amber-900/30 border-amber-700/40 text-amber-50'
+          }`}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <p className="font-semibold">
+                {loreIsFailed ? 'World lore generation failed.' : 'World lore is being generated...'}
+              </p>
+              <p className="text-sm opacity-80">
+                {loreIsFailed
+                  ? loreStatus?.error || 'Something went wrong. Please try again.'
+                  : `Phase: ${phaseText} (${phaseProgress})`}
+              </p>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link
+                href={`/campaign/${campaignId}/lore`}
+                className="px-3 py-1.5 rounded bg-amber-700 text-background-dark hover:bg-amber-600 text-sm font-semibold"
+              >
+                View Progress
+              </Link>
+              {!loreIsFailed && (
+                <button
+                  onClick={() => setHideLoreBanner(true)}
+                  className="px-3 py-1.5 rounded border border-amber-600/50 text-amber-100 hover:bg-amber-800/40 text-sm"
+                >
+                  Continue to Adventure
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showLoreToast && (
+        <div className="fixed bottom-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg bg-emerald-700 text-white border border-emerald-500">
+          <div className="font-semibold">World lore ready</div>
+          <div className="text-sm opacity-90">Open the Lore Explorer to explore your world.</div>
+        </div>
+      )}
 
       {/* ══════════════════════════════════════════════════════════════════════
           MAIN AREA

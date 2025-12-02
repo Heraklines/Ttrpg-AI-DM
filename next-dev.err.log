@@ -1,0 +1,322 @@
+ ⨯ PrismaClientKnownRequestError: 
+Invalid `prisma.campaign.findUnique()` invocation:
+
+
+The table `main.WorldSeed` does not exist in the current database.
+    at async LorePage (./src/app/campaign/[id]/lore/page.tsx:15:22)
+digest: "191846875"
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⨯ src\app\campaign\[id]\page.tsx (115:19) @ fetchLoreStatus
+ ⨯ ReferenceError: Cannot access 'fetchLoreStatus' before initialization
+    at AdventurePage (./src/app/campaign/[id]/page.tsx:49:9)
+digest: "4027808575"
+[0m [90m 113 |[39m       [36mreturn[39m [36mnull[39m[33m;[39m[0m
+[0m [90m 114 |[39m     }[0m
+[0m[31m[1m>[22m[39m[90m 115 |[39m   }[33m,[39m [campaignId[33m,[39m fetchLoreStatus])[33m;[39m[0m
+[0m [90m     |[39m                   [31m[1m^[22m[39m[0m
+[0m [90m 116 |[39m[0m
+[0m [90m 117 |[39m   useEffect(() [33m=>[39m {[0m
+[0m [90m 118 |[39m     fetchCampaign()[33m;[39m[0m
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⨯ src\app\campaign\[id]\page.tsx (115:19) @ fetchLoreStatus
+ ⨯ ReferenceError: Cannot access 'fetchLoreStatus' before initialization
+    at AdventurePage (./src/app/campaign/[id]/page.tsx:49:9)
+digest: "4027808575"
+[0m [90m 113 |[39m       [36mreturn[39m [36mnull[39m[33m;[39m[0m
+[0m [90m 114 |[39m     }[0m
+[0m[31m[1m>[22m[39m[90m 115 |[39m   }[33m,[39m [campaignId[33m,[39m fetchLoreStatus])[33m;[39m[0m
+[0m [90m     |[39m                   [31m[1m^[22m[39m[0m
+[0m [90m 116 |[39m[0m
+[0m [90m 117 |[39m   useEffect(() [33m=>[39m {[0m
+[0m [90m 118 |[39m     fetchCampaign()[33m;[39m[0m
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⨯ src\app\campaign\[id]\page.tsx (115:19) @ fetchLoreStatus
+ ⨯ ReferenceError: Cannot access 'fetchLoreStatus' before initialization
+    at AdventurePage (./src/app/campaign/[id]/page.tsx:49:9)
+digest: "4027808575"
+[0m [90m 113 |[39m       [36mreturn[39m [36mnull[39m[33m;[39m[0m
+[0m [90m 114 |[39m     }[0m
+[0m[31m[1m>[22m[39m[90m 115 |[39m   }[33m,[39m [campaignId[33m,[39m fetchLoreStatus])[33m;[39m[0m
+[0m [90m     |[39m                   [31m[1m^[22m[39m[0m
+[0m [90m 116 |[39m[0m
+[0m [90m 117 |[39m   useEffect(() [33m=>[39m {[0m
+[0m [90m 118 |[39m     fetchCampaign()[33m;[39m[0m
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⨯ src\app\campaign\[id]\page.tsx (115:19) @ fetchLoreStatus
+ ⨯ ReferenceError: Cannot access 'fetchLoreStatus' before initialization
+    at AdventurePage (./src/app/campaign/[id]/page.tsx:49:9)
+digest: "4027808575"
+[0m [90m 113 |[39m       [36mreturn[39m [36mnull[39m[33m;[39m[0m
+[0m [90m 114 |[39m     }[0m
+[0m[31m[1m>[22m[39m[90m 115 |[39m   }[33m,[39m [campaignId[33m,[39m fetchLoreStatus])[33m;[39m[0m
+[0m [90m     |[39m                   [31m[1m^[22m[39m[0m
+[0m [90m 116 |[39m[0m
+[0m [90m 117 |[39m   useEffect(() [33m=>[39m {[0m
+[0m [90m 118 |[39m     fetchCampaign()[33m;[39m[0m
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⨯ ./src/app/campaign/[id]/page.tsx
+Error: 
+  [31mx[0m the name `fetchCampaign` is defined multiple times
+     ,-[[36;1;4mC:\Users\micha\Dnd_App\src\app\campaign\[id]\page.tsx[0m:114:1]
+ [2m114[0m |     }
+ [2m115[0m |   }, [campaignId]);
+ [2m116[0m | 
+ [2m117[0m |   const fetchCampaign = useCallback(async () => {
+     : [31;1m        ^^^^^^|^^^^^^[0m
+     :               [31;1m`-- [31;1mprevious definition of `fetchCampaign` here[0m[0m
+ [2m118[0m |     try {
+ [2m119[0m |       const res = await fetch(`/api/campaign/${campaignId}`);
+ [2m120[0m |       if (!res.ok) {
+ [2m121[0m |         setError(res.status === 404 ? 'Campaign not found' : 'Failed to load campaign');
+ [2m122[0m |         return;
+ [2m123[0m |       }
+ [2m124[0m |       const data = await res.json();
+ [2m125[0m |       
+ [2m126[0m |       if (!data.campaign.characters || data.campaign.characters.length === 0) {
+ [2m127[0m |         router.replace(`/campaign/${campaignId}/setup`);
+ [2m128[0m |         return;
+ [2m129[0m |       }
+ [2m130[0m |       
+ [2m131[0m |       setCampaign(data.campaign);
+ [2m132[0m | 
+ [2m133[0m |       const hasExistingMessages = data.campaign.gameState?.recentMessages && 
+ [2m134[0m |         JSON.parse(data.campaign.gameState.recentMessages).length > 0;
+ [2m135[0m | 
+ [2m136[0m |       if (!hasExistingMessages && data.campaign.characters?.length > 0) {
+ [2m137[0m |         setMessages([{
+ [2m138[0m |           id: 'loading',
+ [2m139[0m |           role: 'assistant',
+ [2m140[0m |           content: 'The Dungeon Master is preparing your adventure...',
+ [2m141[0m |           timestamp: Date.now(),
+ [2m142[0m |         }]);
+ [2m143[0m |         
+ [2m144[0m |         try {
+ [2m145[0m |           const introRes = await fetch('/api/adventure/intro', {
+ [2m146[0m |             method: 'POST',
+ [2m147[0m |             headers: { 'Content-Type': 'application/json' },
+ [2m148[0m |             body: JSON.stringify({ campaignId }),
+ [2m149[0m |           });
+ [2m150[0m |           const introData = await introRes.json();
+ [2m151[0m |           
+ [2m152[0m |           if (introData.intro) {
+ [2m153[0m |             setMessages([{
+ [2m154[0m |               id: 'intro',
+ [2m155[0m |               role: 'assistant',
+ [2m156[0m |               content: introData.intro,
+ [2m157[0m |               timestamp: Date.now(),
+ [2m158[0m |             }]);
+ [2m159[0m |           } else {
+ [2m160[0m |             throw new Error('No intro generated');
+ [2m161[0m |           }
+ [2m162[0m |         } catch {
+ [2m163[0m |           setMessages([{
+ [2m164[0m |             id: 'welcome',
+ [2m165[0m |             role: 'assistant',
+ [2m166[0m |             content: `Welcome to **${data.campaign.name}**!\n\n${data.campaign.description || 'Your adventure awaits...'}\n\nWhat would you like to do?`,
+ [2m167[0m |             timestamp: Date.now(),
+ [2m168[0m |           }]);
+ [2m169[0m |         }
+ [2m170[0m |       } else if (hasExistingMessages) {
+ [2m171[0m |         const existingMessages = JSON.parse(data.campaign.gameState.recentMessages);
+ [2m172[0m |         setMessages(existingMessages.map((msg: { role: string; content: string; timestamp: number }, i: number) => ({
+ [2m173[0m |           id: `msg-${i}`,
+ [2m174[0m |           role: msg.role as 'user' | 'assistant',
+ [2m175[0m |           content: msg.content,
+ [2m176[0m |           timestamp: msg.timestamp,
+ [2m177[0m |         })));
+ [2m178[0m |       }
+ [2m179[0m |     } catch (err) {
+ [2m180[0m |       setError(err instanceof Error ? err.message : 'Failed to load campaign');
+ [2m181[0m |     } finally {
+ [2m182[0m |       setLoading(false);
+ [2m183[0m |     }
+ [2m184[0m |   }, [campaignId, router]);
+ [2m185[0m | 
+ [2m186[0m |   useEffect(() => {
+ [2m187[0m |     fetchCampaign();
+ [2m188[0m |     fetchLoreStatus();
+ [2m189[0m | 
+ [2m190[0m |     let intervalId: number | undefined;
+ [2m191[0m | 
+ [2m192[0m |     const poll = async () => {
+ [2m193[0m |       const status = await fetchLoreStatus();
+ [2m194[0m |       if (!status) return;
+ [2m195[0m |       if (status.status === 'completed' || status.status === 'failed') {
+ [2m196[0m |         if (intervalId) {
+ [2m197[0m |           clearInterval(intervalId);
+ [2m198[0m |         }
+ [2m199[0m |       }
+ [2m200[0m |     };
+ [2m201[0m | 
+ [2m202[0m |     intervalId = window.setInterval(poll, 5000);
+ [2m203[0m | 
+ [2m204[0m |     return () => {
+ [2m205[0m |       if (intervalId) clearInterval(intervalId);
+ [2m206[0m |     };
+ [2m207[0m |   }, [campaignId]);
+ [2m208[0m | 
+ [2m209[0m |   useEffect(() => {
+ [2m210[0m |     if (messagesContainerRef.current) {
+ [2m211[0m |       messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+ [2m212[0m |     }
+ [2m213[0m |   }, [messages]);
+ [2m214[0m | 
+ [2m215[0m |   useEffect(() => {
+ [2m216[0m |     if (campaign?.characters.length && !selectedCharacterId) {
+ [2m217[0m |       setSelectedCharacterId(campaign.characters[0].id);
+ [2m218[0m |     }
+ [2m219[0m |   }, [campaign, selectedCharacterId]);
+ [2m220[0m | 
+ [2m221[0m |   const fetchCampaign = useCallback(async () => {
+     : [33;1m        ^^^^^^|^^^^^^[0m
+     :               [33;1m`-- [33;1m`fetchCampaign` redefined here[0m[0m
+ [2m222[0m |     try {
+ [2m223[0m |       const res = await fetch(`/api/campaign/${campaignId}`);
+ [2m224[0m |       if (!res.ok) {
+     `----
+
+Import trace for requested module:
+./src/app/campaign/[id]/page.tsx
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\DumpStack.log.tmp'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\swapfile.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\DumpStack.log.tmp'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\swapfile.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\DumpStack.log.tmp'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\swapfile.sys'
+ ⨯ ./src/app/campaign/[id]/page.tsx
+Error: 
+  [31mx[0m the name `fetchCampaign` is defined multiple times
+     ,-[[36;1;4mC:\Users\micha\Dnd_App\src\app\campaign\[id]\page.tsx[0m:114:1]
+ [2m114[0m |     }
+ [2m115[0m |   }, [campaignId]);
+ [2m116[0m | 
+ [2m117[0m |   const fetchCampaign = useCallback(async () => {
+     : [31;1m        ^^^^^^|^^^^^^[0m
+     :               [31;1m`-- [31;1mprevious definition of `fetchCampaign` here[0m[0m
+ [2m118[0m |     try {
+ [2m119[0m |       const res = await fetch(`/api/campaign/${campaignId}`);
+ [2m120[0m |       if (!res.ok) {
+ [2m121[0m |         setError(res.status === 404 ? 'Campaign not found' : 'Failed to load campaign');
+ [2m122[0m |         return;
+ [2m123[0m |       }
+ [2m124[0m |       const data = await res.json();
+ [2m125[0m |       
+ [2m126[0m |       if (!data.campaign.characters || data.campaign.characters.length === 0) {
+ [2m127[0m |         router.replace(`/campaign/${campaignId}/setup`);
+ [2m128[0m |         return;
+ [2m129[0m |       }
+ [2m130[0m |       
+ [2m131[0m |       setCampaign(data.campaign);
+ [2m132[0m | 
+ [2m133[0m |       const hasExistingMessages = data.campaign.gameState?.recentMessages && 
+ [2m134[0m |         JSON.parse(data.campaign.gameState.recentMessages).length > 0;
+ [2m135[0m | 
+ [2m136[0m |       if (!hasExistingMessages && data.campaign.characters?.length > 0) {
+ [2m137[0m |         setMessages([{
+ [2m138[0m |           id: 'loading',
+ [2m139[0m |           role: 'assistant',
+ [2m140[0m |           content: 'The Dungeon Master is preparing your adventure...',
+ [2m141[0m |           timestamp: Date.now(),
+ [2m142[0m |         }]);
+ [2m143[0m |         
+ [2m144[0m |         try {
+ [2m145[0m |           const introRes = await fetch('/api/adventure/intro', {
+ [2m146[0m |             method: 'POST',
+ [2m147[0m |             headers: { 'Content-Type': 'application/json' },
+ [2m148[0m |             body: JSON.stringify({ campaignId }),
+ [2m149[0m |           });
+ [2m150[0m |           const introData = await introRes.json();
+ [2m151[0m |           
+ [2m152[0m |           if (introData.intro) {
+ [2m153[0m |             setMessages([{
+ [2m154[0m |               id: 'intro',
+ [2m155[0m |               role: 'assistant',
+ [2m156[0m |               content: introData.intro,
+ [2m157[0m |               timestamp: Date.now(),
+ [2m158[0m |             }]);
+ [2m159[0m |           } else {
+ [2m160[0m |             throw new Error('No intro generated');
+ [2m161[0m |           }
+ [2m162[0m |         } catch {
+ [2m163[0m |           setMessages([{
+ [2m164[0m |             id: 'welcome',
+ [2m165[0m |             role: 'assistant',
+ [2m166[0m |             content: `Welcome to **${data.campaign.name}**!\n\n${data.campaign.description || 'Your adventure awaits...'}\n\nWhat would you like to do?`,
+ [2m167[0m |             timestamp: Date.now(),
+ [2m168[0m |           }]);
+ [2m169[0m |         }
+ [2m170[0m |       } else if (hasExistingMessages) {
+ [2m171[0m |         const existingMessages = JSON.parse(data.campaign.gameState.recentMessages);
+ [2m172[0m |         setMessages(existingMessages.map((msg: { role: string; content: string; timestamp: number }, i: number) => ({
+ [2m173[0m |           id: `msg-${i}`,
+ [2m174[0m |           role: msg.role as 'user' | 'assistant',
+ [2m175[0m |           content: msg.content,
+ [2m176[0m |           timestamp: msg.timestamp,
+ [2m177[0m |         })));
+ [2m178[0m |       }
+ [2m179[0m |     } catch (err) {
+ [2m180[0m |       setError(err instanceof Error ? err.message : 'Failed to load campaign');
+ [2m181[0m |     } finally {
+ [2m182[0m |       setLoading(false);
+ [2m183[0m |     }
+ [2m184[0m |   }, [campaignId, router]);
+ [2m185[0m | 
+ [2m186[0m |   useEffect(() => {
+ [2m187[0m |     fetchCampaign();
+ [2m188[0m |     fetchLoreStatus();
+ [2m189[0m | 
+ [2m190[0m |     let intervalId: number | undefined;
+ [2m191[0m | 
+ [2m192[0m |     const poll = async () => {
+ [2m193[0m |       const status = await fetchLoreStatus();
+ [2m194[0m |       if (!status) return;
+ [2m195[0m |       if (status.status === 'completed' || status.status === 'failed') {
+ [2m196[0m |         if (intervalId) {
+ [2m197[0m |           clearInterval(intervalId);
+ [2m198[0m |         }
+ [2m199[0m |       }
+ [2m200[0m |     };
+ [2m201[0m | 
+ [2m202[0m |     intervalId = window.setInterval(poll, 5000);
+ [2m203[0m | 
+ [2m204[0m |     return () => {
+ [2m205[0m |       if (intervalId) clearInterval(intervalId);
+ [2m206[0m |     };
+ [2m207[0m |   }, [campaignId]);
+ [2m208[0m | 
+ [2m209[0m |   useEffect(() => {
+ [2m210[0m |     if (messagesContainerRef.current) {
+ [2m211[0m |       messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+ [2m212[0m |     }
+ [2m213[0m |   }, [messages]);
+ [2m214[0m | 
+ [2m215[0m |   useEffect(() => {
+ [2m216[0m |     if (campaign?.characters.length && !selectedCharacterId) {
+ [2m217[0m |       setSelectedCharacterId(campaign.characters[0].id);
+ [2m218[0m |     }
+ [2m219[0m |   }, [campaign, selectedCharacterId]);
+ [2m220[0m | 
+ [2m221[0m |   const fetchCampaign = useCallback(async () => {
+     : [33;1m        ^^^^^^|^^^^^^[0m
+     :               [33;1m`-- [33;1m`fetchCampaign` redefined here[0m[0m
+ [2m222[0m |     try {
+ [2m223[0m |       const res = await fetch(`/api/campaign/${campaignId}`);
+ [2m224[0m |       if (!res.ok) {
+     `----
+
+Import trace for requested module:
+./src/app/campaign/[id]/page.tsx
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\DumpStack.log.tmp'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\swapfile.sys'
+<w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\micha\Dnd_App\.next\cache\webpack\client-development-fallback\0.pack.gz_' -> 'C:\Users\micha\Dnd_App\.next\cache\webpack\client-development-fallback\0.pack.gz'
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload

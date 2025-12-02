@@ -9,3 +9,179 @@
 
  ✓ Starting...
  ✓ Ready in 4.1s
+ ○ Compiling / ...
+ ✓ Compiled / in 6.6s (497 modules)
+ ✓ Compiled in 672ms (257 modules)
+ GET / 200 in 7361ms
+ ○ Compiling /campaigns ...
+ ✓ Compiled /campaigns in 545ms (489 modules)
+ ○ Compiling /api/campaign-template ...
+ ✓ Compiled /api/campaign-template in 561ms (295 modules)
+ ✓ Compiled (297 modules)
+ GET /api/campaign-template 200 in 1110ms
+ GET /api/campaign 200 in 1117ms
+ GET /api/campaign-template 200 in 28ms
+ GET /api/campaign 200 in 37ms
+ POST /api/campaign 201 in 67ms
+ ✓ Compiled /campaign/[id]/setup in 448ms (550 modules)
+ ✓ Compiled /api/campaign/[id] in 299ms (304 modules)
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 1068ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 38ms
+ ✓ Compiled /api/character in 164ms (306 modules)
+ GET /api/character 200 in 244ms
+ GET /api/character 200 in 31ms
+ ✓ Compiled /api/character/[id] in 172ms (306 modules)
+ PATCH /api/character/f0df1e83-e367-4934-9b38-426946100d01 200 in 1296ms
+ ○ Compiling /campaign/[id] ...
+ ✓ Compiled /campaign/[id] in 530ms (562 modules)
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 39ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 36ms
+ ○ Compiling /api/adventure/intro ...
+ ✓ Compiled /api/adventure/intro in 757ms (342 modules)
+ POST /api/adventure/intro 200 in 30418ms
+ POST /api/adventure/intro 200 in 32073ms
+ ✓ Compiled /campaign/[id]/settings in 445ms (595 modules)
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 72ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 22ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 39ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 27ms
+ ○ Compiling /api/campaign-template ...
+ ✓ Compiled /api/campaign-template in 508ms (309 modules)
+ ✓ Compiled (311 modules)
+ GET /api/campaign-template 200 in 877ms
+ GET /api/campaign 200 in 897ms
+ GET /api/campaign-template 200 in 20ms
+ GET /api/campaign 200 in 24ms
+ GET /api/campaign-template 200 in 100ms
+ GET /api/campaign 200 in 113ms
+ GET /api/campaign-template 200 in 45ms
+ GET /api/campaign 200 in 63ms
+ ○ Compiling /api/campaign/[id] ...
+ ✓ Compiled /api/campaign/[id] in 866ms (313 modules)
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 1063ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 45ms
+ ✓ Compiled /api/character in 215ms (315 modules)
+ GET /api/character 200 in 336ms
+ GET /api/character 200 in 71ms
+ GET /api/campaign 200 in 68ms
+ GET /api/campaign-template 200 in 58ms
+ GET /api/campaign 200 in 43ms
+ GET /api/campaign-template 200 in 48ms
+ ✓ Compiled in 1561ms (582 modules)
+ ✓ Compiled in 1916ms (267 modules)
+ ✓ Compiled in 760ms (267 modules)
+ ✓ Compiled in 612ms (267 modules)
+ ✓ Compiled in 632ms (267 modules)
+ ✓ Compiled in 570ms (267 modules)
+ ✓ Compiled in 464ms (267 modules)
+ ✓ Compiled in 761ms (267 modules)
+ ✓ Compiled in 620ms (267 modules)
+ GET /campaigns 200 in 772ms
+ GET /api/campaign-template 200 in 316ms
+ GET /api/campaign 200 in 343ms
+ GET /api/campaign-template 200 in 74ms
+ GET /api/campaign 200 in 91ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 77ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 38ms
+ GET /api/character 200 in 88ms
+ GET /api/character 200 in 71ms
+ GET /api/campaign 200 in 58ms
+ GET /api/campaign-template 200 in 52ms
+ GET /api/campaign 200 in 56ms
+ GET /api/campaign-template 200 in 65ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 57ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 26ms
+ ○ Compiling /campaign/[id]/lore ...
+ ✓ Compiled /campaign/[id]/lore in 2.5s (581 modules)
+ ✓ Compiled in 1589ms (591 modules)
+ GET /campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 1411ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 126ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 46ms
+ ✓ Compiled in 1356ms (576 modules)
+ ✓ Compiled in 1991ms (536 modules)
+ ✓ Compiled in 1344ms (536 modules)
+ ✓ Compiled /api/campaign/[id] in 442ms (305 modules)
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 784ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 44ms
+ ✓ Compiled in 1316ms (576 modules)
+ ✓ Compiled in 1ms (305 modules)
+ ✓ Compiled in 1ms (305 modules)
+ ✓ Compiled in 1ms (305 modules)
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 1606ms
+ ✓ Compiled in 2ms (305 modules)
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 836ms
+ ✓ Compiled in 1736ms (576 modules)
+ ✓ Compiled in 2.2s (576 modules)
+ GET /campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 500 in 903ms
+ ✓ Compiled in 1575ms (536 modules)
+ GET /campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 500 in 594ms
+ ✓ Compiled in 1694ms (536 modules)
+ GET /campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 500 in 627ms
+ ✓ Compiled in 1683ms (536 modules)
+ GET /campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 500 in 315ms
+ ✓ Compiled in 1309ms (536 modules)
+ GET /campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 203ms
+ ○ Compiling /api/campaign/[id]/lore-status ...
+ ✓ Compiled /api/campaign/[id]/lore-status in 545ms (305 modules)
+ ✓ Compiled (316 modules)
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 1149ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 40ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 1755ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 37ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 61ms
+ ○ Compiling /_error ...
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 500 in 9130ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 500 in 107ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 500 in 330ms
+ GET /campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 500 in 93ms
+ ✓ Compiled /_not-found in 1921ms (816 modules)
+ ✓ Compiled (802 modules)
+ GET /_next/static/webpack/97b9bd29efd068e6.webpack.hot-update.json 404 in 1868ms
+ GET /campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 404ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 64ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 103ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 53ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 46ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 49ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 37ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 39ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 35ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 42ms
+ ✓ Compiled in 723ms (814 modules)
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 54ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 40ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 28ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 48ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 29ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 62ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 32ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 62ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 73ms
+ ✓ Compiled in 898ms (799 modules)
+ ✓ Compiled /api/campaign/[id] in 186ms (356 modules)
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 452ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 440ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 42ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 49ms
+ ✓ Compiled in 642ms (811 modules)
+ ✓ Compiled in 1ms (356 modules)
+ ✓ Compiled in 1ms (356 modules)
+ ✓ Compiled in 0ms (356 modules)
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 734ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 739ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 48ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 47ms
+ ✓ Compiled in 1060ms (811 modules)
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23 200 in 545ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 549ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 45ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 48ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 59ms
+ ✓ Compiled in 563ms (811 modules)
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 66ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 50ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 56ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 78ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 49ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 61ms
+ GET /api/campaign/ba3b43e2-f072-4ff3-8209-6dd959112d23/lore-status 200 in 56ms

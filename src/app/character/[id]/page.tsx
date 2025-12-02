@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 
@@ -89,9 +89,9 @@ export default function CharacterSheetPage() {
 
   useEffect(() => {
     fetchCharacter();
-  }, [characterId]);
+  }, [characterId, fetchCharacter]);
 
-  async function fetchCharacter() {
+  const fetchCharacter = useCallback(async () => {
     try {
       const res = await fetch(`/api/character/${characterId}`);
       if (!res.ok) {
@@ -109,7 +109,7 @@ export default function CharacterSheetPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [characterId]);
 
   if (loading) {
     return (

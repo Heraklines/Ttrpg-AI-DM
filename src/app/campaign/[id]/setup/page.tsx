@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -35,11 +35,7 @@ export default function CampaignSetupPage() {
   const [error, setError] = useState<string | null>(null);
   const [joining, setJoining] = useState(false);
 
-  useEffect(() => {
-    loadData();
-  }, [campaignId]);
-
-  async function loadData() {
+  const loadData = useCallback(async () => {
     try {
       // Load campaign
       const campaignRes = await fetch(`/api/campaign/${campaignId}`);
@@ -65,7 +61,11 @@ export default function CampaignSetupPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [campaignId]);
+
+  useEffect(() => {
+    loadData();
+  }, [campaignId, loadData]);
 
   function toggleCharacter(charId: string) {
     const newSelected = new Set(selectedCharacters);

@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db';
 import { LoreExplorer } from '@/components/lore-explorer/LoreExplorer';
+import { LoreGenerationStatus } from '@/components/lore-explorer/LoreGenerationStatus';
 import Link from 'next/link';
 
 export default async function LorePage({ params }: { params: { id: string } }) {
@@ -23,17 +24,15 @@ export default async function LorePage({ params }: { params: { id: string } }) {
     );
   }
 
-  if (!campaign.worldSeed) {
+  const worldSeed = campaign.worldSeed;
+  if (!worldSeed || worldSeed.generationStatus !== 'completed') {
     return (
-      <div className="min-h-screen bg-background-dark flex items-center justify-center">
-        <div className="text-center text-parchment max-w-md">
-          <h1 className="text-2xl font-medieval text-primary-gold mb-4">Generating World Lore...</h1>
-          <p className="mb-4">The world lore for this campaign is still being generated. Please check back in a few moments.</p>
-          <Link href={`/campaign/${params.id}`} className="text-tertiary-blue hover:underline">
-            Return to Campaign
-          </Link>
-        </div>
-      </div>
+      <LoreGenerationStatus
+        campaignId={params.id}
+        initialStatus={worldSeed?.generationStatus || 'pending'}
+        initialPhase={worldSeed?.currentPhase || null}
+        initialError={worldSeed?.generationError || null}
+      />
     );
   }
 

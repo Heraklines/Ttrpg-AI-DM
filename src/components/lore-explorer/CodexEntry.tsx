@@ -2,7 +2,14 @@
 
 import { useMemo } from 'react';
 
-type EntityType = 'faction' | 'npc' | 'location' | 'conflict' | 'secret' | 'cosmology';
+export type EntityType =
+  | 'faction'
+  | 'npc'
+  | 'location'
+  | 'conflict'
+  | 'secret'
+  | 'cosmology'
+  | 'history';
 
 interface CodexEntryProps {
   entityType: EntityType;
@@ -89,6 +96,10 @@ export function CodexEntry({
         return <ConflictContent entity={entity} isDmMode={isDmMode} onNavigate={onNavigate} />;
       case 'secret':
         return <SecretContent entity={entity} isDmMode={isDmMode} onNavigate={onNavigate} />;
+      case 'cosmology':
+        return <CosmologyContent entity={entity} isDmMode={isDmMode} />;
+      case 'history':
+        return <HistoryContent entity={entity} />;
       default:
         return <div>Unknown entity type</div>;
     }
@@ -196,6 +207,216 @@ function FactionContent({
   );
 }
 
+function CosmologyContent({
+  entity,
+  isDmMode,
+}: {
+  entity: Record<string, unknown>;
+  isDmMode: boolean;
+}) {
+  const magicSystem = (entity.magicSystem as Record<string, unknown>) || {};
+  const planarStructure = (entity.planarStructure as Record<string, unknown>) || {};
+  const prophecies = Array.isArray(entity.prophecies) ? entity.prophecies : [];
+  const pantheon = Array.isArray(entity.pantheon) ? entity.pantheon : [];
+
+  const isSystemView =
+    Object.keys(magicSystem).length > 0 ||
+    Object.keys(planarStructure).length > 0 ||
+    prophecies.length > 0;
+
+  if (!isSystemView) {
+    const tensionStance = (entity.tensionStance as Record<string, unknown>) || {};
+    return (
+      <div className="space-y-4 text-parchment">
+        {Boolean(entity.domain) && (
+          <div>
+            <span className="text-primary-gold text-sm">Domain:</span>{' '}
+            <span className="capitalize">{entity.domain as string}</span>
+          </div>
+        )}
+
+        {Boolean(entity.alignment) && (
+          <div>
+            <span className="text-primary-gold text-sm">Alignment:</span>{' '}
+            <span>{entity.alignment as string}</span>
+          </div>
+        )}
+
+        {tensionStance.tensionName && (
+          <div className="border border-primary-gold/30 rounded p-3 bg-background-dark/40 text-sm">
+            <div className="text-primary-gold">Tension Stance</div>
+            <div className="mt-1">
+              {tensionStance.tensionName}: {tensionStance.side} — {tensionStance.reason}
+            </div>
+          </div>
+        )}
+
+        {Boolean(entity.mythos) && (
+          <div>
+            <span className="text-primary-gold text-sm">Mythos:</span>
+            <p className="mt-1">{entity.mythos as string}</p>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4 text-parchment">
+      {Object.keys(magicSystem).length > 0 && (
+        <div className="space-y-2">
+          <div className="text-primary-gold text-sm uppercase tracking-wide">Magic System</div>
+          {magicSystem.source && <div><span className="text-primary-gold">Source:</span> {magicSystem.source as string}</div>}
+          {magicSystem.rules && <div><span className="text-primary-gold">Rules:</span> {magicSystem.rules as string}</div>}
+          {magicSystem.limitations && <div><span className="text-primary-gold">Limits:</span> {magicSystem.limitations as string}</div>}
+          {magicSystem.tensionRelevance && (
+            <div className="italic text-sm text-parchment/70">{magicSystem.tensionRelevance as string}</div>
+          )}
+        </div>
+      )}
+
+      {Object.keys(planarStructure).length > 0 && (
+        <div className="space-y-2">
+          <div className="text-primary-gold text-sm uppercase tracking-wide">Planar Structure</div>
+          {planarStructure.description && <p>{planarStructure.description as string}</p>}
+          {Array.isArray(planarStructure.relevantPlanes) && planarStructure.relevantPlanes.length > 0 && (
+            <ul className="space-y-1 text-sm">
+              {(planarStructure.relevantPlanes as Array<Record<string, string>>).map((plane, i) => (
+                <li key={i}>
+                  <span className="font-semibold">{plane.name}:</span> {plane.description}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
+
+      {isDmMode && pantheon.length > 0 && (
+        <div>
+          <div className="text-primary-gold text-sm uppercase tracking-wide">Pantheon Snapshot</div>
+          <div className="flex flex-wrap gap-2 mt-2 text-sm">
+            {(pantheon as Array<Record<string, unknown>>).slice(0, 6).map((deity, i) => (
+              <span key={i} className="px-2 py-1 bg-background-dark rounded capitalize">
+                {deity.name as string}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {prophecies.length > 0 && (
+        <div>
+          <div className="text-primary-gold text-sm uppercase tracking-wide">Prophecies</div>
+          <ul className="mt-1 space-y-2 text-sm">
+            {prophecies.map((p: Record<string, unknown>, i: number) => (
+              <li key={i} className="bg-background-dark/60 rounded p-3">
+                <div>{p.content as string}</div>
+                {p.relatedTension && (
+                  <div className="text-xs text-parchment/60 mt-1">Related to: {p.relatedTension as string}</div>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {Boolean(entity.creationStory) && (
+        <div className="border-l-2 border-primary-gold/50 pl-3 italic text-parchment/80">
+          {entity.creationStory as string}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function HistoryContent({ entity }: { entity: Record<string, unknown> }) {
+  const kind = (entity.type as string) || 'era';
+  const themes = Array.isArray(entity.themes) ? entity.themes : [];
+  const highlights = Array.isArray(entity.keyConflicts) ? entity.keyConflicts : [];
+  const events = Array.isArray(entity.events) ? entity.events : [];
+  const factions = Array.isArray(entity.factions) ? entity.factions : [];
+  const summary = (entity.summary as string) || (entity.description as string);
+
+  if (kind === 'event') {
+    return (
+      <div className="space-y-4 text-parchment">
+        {summary && <p>{summary}</p>}
+
+        {Boolean(entity.impact) && (
+          <div>
+            <span className="text-primary-gold text-sm">Impact:</span>{' '}
+            <span>{entity.impact as string}</span>
+          </div>
+        )}
+
+        {factions.length > 0 && (
+          <div className="text-sm">
+            <span className="text-primary-gold">Involved Factions:</span>{' '}
+            {factions.join(', ')}
+          </div>
+        )}
+
+        {events.length > 0 && (
+          <div>
+            <span className="text-primary-gold text-sm">Follow-on Events:</span>
+            <ul className="mt-1 space-y-1 text-sm list-disc list-inside">
+              {events.map((e: string, i: number) => (
+                <li key={i}>{e}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4 text-parchment">
+      {Boolean(entity.span) && (
+        <div className="text-sm text-parchment/70">
+          <span className="text-primary-gold">Span:</span> {entity.span as string}
+        </div>
+      )}
+
+      {summary && <p>{summary}</p>}
+
+      {themes.length > 0 && (
+        <div>
+          <span className="text-primary-gold text-sm">Themes:</span>
+          <div className="mt-1 flex flex-wrap gap-2 text-sm">
+            {themes.map((t: string, i: number) => (
+              <span key={i} className="px-2 py-1 bg-background-dark rounded">
+                {t}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {highlights.length > 0 && (
+        <div>
+          <span className="text-primary-gold text-sm">Key Conflicts:</span>
+          <ul className="mt-1 space-y-1 text-sm list-disc list-inside">
+            {highlights.map((conflict: string, i: number) => (
+              <li key={i}>{conflict}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {events.length > 0 && (
+        <div>
+          <span className="text-primary-gold text-sm">Notable Events:</span>
+          <ul className="mt-1 space-y-1 text-sm list-disc list-inside">
+            {events.map((evt: string, i: number) => (
+              <li key={i}>{evt}</li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
+  );
+}
 function NpcContent({
   entity,
   isDmMode,

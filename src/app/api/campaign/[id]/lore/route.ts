@@ -1,6 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 
+const safeParseArray = (value: unknown) => {
+  if (!value || typeof value !== 'string') return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+};
+
 export async function GET(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -61,6 +71,65 @@ export async function GET(
         });
         entities = secrets.map((s) => ({ ...s, isDiscovered: s.isRevealed }));
         break;
+
+      case 'history': {
+        const history = await prisma.worldHistory.findUnique({
+          where: { worldSeedId },
+        });
+
+        if (history) {
+          const eras = safeParseArray(history.eras);
+          const majorEvents = safeParseArray(history.majorEvents);
+
+          const eraEntities = eras.map((era: Record<string, unknown>, index: number) => ({
+            id: `history:${history.id}:era:${index}`,
+            name: (era.name as string) || `Era ${index + 1}`,
+            tier: (era.tier as string) || 'major',
+            type: 'era',
+            isDiscovered: true,
+          }));
+
+          const eventEntities = majorEvents.map((evt: Record<string, unknown>, index: number) => ({
+            id: `history:${history.id}:event:${index}`,
+            name: (evt.name as string) || (evt.title as string) || `Event ${index + 1}`,
+            tier: (evt.tier as string) || 'supporting',
+            type: (evt.type as string) || 'event',
+            isDiscovered: true,
+          }));
+
+          entities = [...eraEntities, ...eventEntities];
+        }
+        break;
+      }
+
+      case 'cosmology': {
+        const cosmology = await prisma.worldCosmology.findUnique({
+          where: { worldSeedId },
+        });
+
+        if (cosmology) {
+          const pantheon = safeParseArray(cosmology.pantheon);
+
+          const deityEntities = pantheon.map((deity: Record<string, unknown>, index: number) => ({
+            id: `cosmology:${cosmology.id}:deity:${index}`,
+            name: (deity.name as string) || `Deity ${index + 1}`,
+            tier: (deity.tier as string) || 'major',
+            type: (deity.domain as string) || 'deity',
+            isDiscovered: true,
+          }));
+
+          const systemEntity = {
+            id: `cosmology:${cosmology.id}:magic`,
+            name: 'Magic & Planes',
+            tier: 'major',
+            type: 'system',
+            isDiscovered: true,
+          };
+
+          entities = [...deityEntities, systemEntity];
+        }
+        break;
+      }
 
       default:
         return NextResponse.json({ entities: [] });

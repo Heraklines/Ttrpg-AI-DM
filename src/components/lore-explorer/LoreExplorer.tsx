@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { NavigationSidebar, LoreCategory } from './NavigationSidebar';
-import { CodexEntry } from './CodexEntry';
+import { CodexEntry, EntityType } from './CodexEntry';
 
 interface LoreExplorerProps {
   campaignId: string;
@@ -65,7 +65,7 @@ export function LoreExplorer({
       const res = await fetch(`/api/campaign/${campaignId}/lore/counts?worldSeedId=${worldSeedId}`);
       if (res.ok) {
         const data = await res.json();
-        setEntityCounts(data.counts || entityCounts);
+        setEntityCounts((prev) => data.counts || prev);
       }
     } catch (error) {
       console.error('Failed to fetch entity counts:', error);
@@ -129,8 +129,8 @@ export function LoreExplorer({
     return entity.name.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
-  const categoryToEntityType = (category: LoreCategory) => {
-    const map: Record<LoreCategory, string> = {
+  const categoryToEntityType = (category: LoreCategory): EntityType => {
+    const map: Record<LoreCategory, EntityType> = {
       geography: 'location',
       factions: 'faction',
       people: 'npc',
@@ -139,7 +139,7 @@ export function LoreExplorer({
       cosmology: 'cosmology',
       secrets: 'secret',
     };
-    return map[category] || 'unknown';
+    return map[category];
   };
 
   return (
@@ -244,13 +244,13 @@ export function LoreExplorer({
 
           <div className="flex-1 overflow-y-auto p-6">
             {selectedEntity ? (
-              <CodexEntry
-                entityType={categoryToEntityType(selectedCategory) as 'faction' | 'npc' | 'location' | 'conflict' | 'secret'}
-                entity={selectedEntity}
-                isDmMode={mode === 'dm'}
-                onNavigate={handleNavigate}
-                onShowOnMap={handleShowOnMap}
-              />
+                <CodexEntry
+                  entityType={categoryToEntityType(selectedCategory)}
+                  entity={selectedEntity}
+                  isDmMode={mode === 'dm'}
+                  onNavigate={handleNavigate}
+                  onShowOnMap={handleShowOnMap}
+                />
             ) : (
               <div className="flex items-center justify-center h-full text-parchment/50">
                 <div className="text-center">
