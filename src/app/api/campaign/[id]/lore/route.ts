@@ -1,129 +1,74 @@
-// src/app/api/campaign/[id]/lore/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
 import { prisma } from '@/lib/db';
-import { loreContextManager } from '@/lib/lore';
 
-// GET: Fetch all lore for a campaign
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id: campaignId } = await params;
-
-    const lore = await prisma.campaignLore.findUnique({
-      where: { campaignId },
-      include: {
-        npcs: true,
-        factions: true,
-        locations: true,
-        conflicts: true,
-        secrets: true
-      }
-    });
-
-    if (!lore) {
-      return NextResponse.json(
-        { error: 'Lore not found for this campaign' },
-        { status: 404 }
-      );
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get('category');
+    const worldSeedId = searchParams.get('worldSeedId');
+    
+    if (!worldSeedId) {
+      return NextResponse.json({ error: 'worldSeedId required' }, { status: 400 });
     }
 
-    // Parse JSON fields
-    const parsedLore = {
-      id: lore.id,
-      campaignId: lore.campaignId,
-      generationStatus: lore.generationStatus,
-      worldName: lore.worldName,
-      tone: lore.tone,
-      themes: JSON.parse(lore.themes),
-      cosmology: JSON.parse(lore.cosmology),
-      worldHistory: JSON.parse(lore.worldHistory),
-      npcs: lore.npcs.map(npc => ({
-        ...npc,
-        personality: JSON.parse(npc.personality),
-        quirks: JSON.parse(npc.quirks),
-        fears: JSON.parse(npc.fears),
-        relationships: JSON.parse(npc.relationships)
-      })),
-      factions: lore.factions.map(f => ({
-        ...f,
-        goals: JSON.parse(f.goals),
-        methods: JSON.parse(f.methods),
-        resources: JSON.parse(f.resources),
-        allies: JSON.parse(f.allies),
-        enemies: JSON.parse(f.enemies),
-        territory: JSON.parse(f.territory)
-      })),
-      locations: lore.locations.map(l => ({
-        ...l,
-        sensoryDetails: JSON.parse(l.sensoryDetails),
-        connectedTo: JSON.parse(l.connectedTo),
-        currentEvents: JSON.parse(l.currentEvents),
-        notableNpcs: JSON.parse(l.notableNpcs),
-        factionPresence: JSON.parse(l.factionPresence),
-        hiddenSecrets: JSON.parse(l.hiddenSecrets)
-      })),
-      conflicts: lore.conflicts.map(c => ({
-        ...c,
-        participants: JSON.parse(c.participants),
-        recentEvents: JSON.parse(c.recentEvents),
-        possibleOutcomes: JSON.parse(c.possibleOutcomes)
-      })),
-      secrets: lore.secrets.map(s => ({
-        ...s,
-        hints: JSON.parse(s.hints),
-        relatedNpcs: JSON.parse(s.relatedNpcs),
-        relatedFactions: JSON.parse(s.relatedFactions),
-        relatedLocations: JSON.parse(s.relatedLocations),
-        discoveryConditions: JSON.parse(s.discoveryConditions),
-        partiallyKnown: JSON.parse(s.partiallyKnown)
-      }))
-    };
+    let entities: { id: string; name: string; tier: string; type?: string; isDiscovered: boolean }[] = [];
 
-    return NextResponse.json({ data: parsedLore });
+    switch (category) {
+      case 'factions':
+        const factions = await prisma.worldFaction.findMany({
+          where: { worldSeedId },
+          select: { id: true, name: true, tier: true, type: true, isDiscovered: true },
+          orderBy: [{ tier: 'asc' }, { name: 'asc' }],
+        });
+        entities = factions;
+        break;
 
-  } catch (error) {
-    console.error('Error fetching lore:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch lore' },
-      { status: 500 }
-    );
-  }
-}
+      case 'people':
+        const npcs = await prisma.worldNpc.findMany({
+          where: { worldSeedId },
+          select: { id: true, name: true, tier: true, occupation: true, isDiscovered: true },
+          orderBy: [{ tier: 'asc' }, { name: 'asc' }],
+        });
+        entities = npcs.map((n) => ({ ...n, type: n.occupation || undefined }));
+        break;
 
-// POST: Query lore by topic
-const QuerySchema = z.object({
-  topic: z.string().min(1),
-  type: z.enum(['npc', 'faction', 'location', 'conflict', 'secret']).optional()
-});
+      case 'geography':
+        const locations = await prisma.worldLocation.findMany({
+          where: { worldSeedId },
+          select: { id: true, name: true, tier: true, type: true, isDiscovered: true },
+          orderBy: [{ tier: 'asc' }, { name: 'asc' }],
+        });
+        entities = locations;
+        break;
 
-export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
-) {
-  try {
-    const { id: campaignId } = await params;
-    const body = await request.json();
-    const { topic, type } = QuerySchema.parse(body);
+      case 'conflicts':
+        const conflicts = await prisma.worldConflict.findMany({
+          where: { worldSeedId },
+          select: { id: true, name: true, tier: true, type: true, isDiscovered: true },
+          orderBy: [{ tier: 'asc' }, { name: 'asc' }],
+        });
+        entities = conflicts;
+        break;
 
-    const result = await loreContextManager.queryLore(campaignId, topic, type);
+      case 'secrets':
+        const secrets = await prisma.worldSecret.findMany({
+          where: { worldSeedId },
+          select: { id: true, name: true, tier: true, type: true, isRevealed: true },
+          orderBy: [{ tier: 'asc' }, { name: 'asc' }],
+        });
+        entities = secrets.map((s) => ({ ...s, isDiscovered: s.isRevealed }));
+        break;
 
-    return NextResponse.json({ data: result });
-
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: 'Invalid request', details: error.errors },
-        { status: 400 }
-      );
+      default:
+        return NextResponse.json({ entities: [] });
     }
 
-    console.error('Error querying lore:', error);
-    return NextResponse.json(
-      { error: 'Failed to query lore' },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: true, entities });
+  } catch (error) {
+    console.error('Fetch lore error:', error);
+    return NextResponse.json({ error: 'Failed to fetch lore' }, { status: 500 });
   }
 }
