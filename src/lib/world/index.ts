@@ -14,3 +14,6 @@ export type {
   GraphEdge,
   GraphData 
 } from './relationship-service';
+
+export { discoveryService, DiscoveryService } from './discovery-service';
+export type { DiscoveryLevel, DiscoveryState, DiscoveredEntity } from './discovery-service';
