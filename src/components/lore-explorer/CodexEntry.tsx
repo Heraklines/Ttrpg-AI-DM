@@ -140,14 +140,14 @@ function FactionContent({
         <span className="capitalize">{entity.type as string}</span>
       </div>
 
-      {entity.philosophy && (
+      {(entity.philosophy as string) && (
         <div>
           <span className="text-primary-gold text-sm">Philosophy:</span>
           <p className="mt-1 italic">&quot;{entity.philosophy as string}&quot;</p>
         </div>
       )}
 
-      {entity.publicImage && (
+      {Boolean(entity.publicImage) && (
         <div>
           <span className="text-primary-gold text-sm">Public Image:</span>
           <p className="mt-1">{parseHyperlinks(entity.publicImage as string, onNavigate)}</p>
@@ -167,7 +167,7 @@ function FactionContent({
         </div>
       )}
 
-      {entity.motto && (
+      {Boolean(entity.motto) && (
         <div className="border-l-2 border-primary-gold pl-3 italic">
           &quot;{entity.motto as string}&quot;
         </div>
@@ -190,7 +190,7 @@ function FactionContent({
         <span>
           <span className="text-primary-gold">Influence:</span> {entity.influence as number}/10
         </span>
-        {entity.symbol && <span>⚑ {entity.symbol as string}</span>}
+        {Boolean(entity.symbol) && <span>⚑ {entity.symbol as string}</span>}
       </div>
     </div>
   );
@@ -212,19 +212,19 @@ function NpcContent({
   return (
     <div className="space-y-4 text-parchment">
       <div className="flex gap-4">
-        {entity.race && (
+        {Boolean(entity.race) && (
           <div>
             <span className="text-primary-gold text-sm">Race:</span> {entity.race as string}
           </div>
         )}
-        {entity.occupation && (
+        {Boolean(entity.occupation) && (
           <div>
             <span className="text-primary-gold text-sm">Occupation:</span> {entity.occupation as string}
           </div>
         )}
       </div>
 
-      {entity.appearance && (
+      {Boolean(entity.appearance) && (
         <div>
           <span className="text-primary-gold text-sm">Appearance:</span>
           <p className="mt-1">{entity.appearance as string}</p>
@@ -244,21 +244,21 @@ function NpcContent({
         </div>
       )}
 
-      {entity.speakingStyle && (
+      {Boolean(entity.speakingStyle) && (
         <div>
           <span className="text-primary-gold text-sm">Speaking Style:</span>{' '}
           <span className="italic">{entity.speakingStyle as string}</span>
         </div>
       )}
 
-      {entity.publicGoal && (
+      {Boolean(entity.publicGoal) && (
         <div>
           <span className="text-primary-gold text-sm">Goal:</span>
           <p className="mt-1">{parseHyperlinks(entity.publicGoal as string, onNavigate)}</p>
         </div>
       )}
 
-      {isDmMode && entity.privateGoal && entity.privateGoal !== entity.publicGoal && (
+      {isDmMode && Boolean(entity.privateGoal) && entity.privateGoal !== entity.publicGoal && (
         <div className="border border-ember-red/30 rounded p-3 bg-ember-red/5">
           <span className="text-ember-red text-sm">🔒 True Goal (DM Only):</span>
           <p className="mt-1">{parseHyperlinks(entity.privateGoal as string, onNavigate)}</p>
@@ -311,13 +311,13 @@ function LocationContent({
     <div className="space-y-4 text-parchment">
       <div className="flex justify-between items-start">
         <div className="flex gap-4">
-          {entity.type && (
+          {Boolean(entity.type) && (
             <div>
               <span className="text-primary-gold text-sm">Type:</span>{' '}
               <span className="capitalize">{entity.type as string}</span>
             </div>
           )}
-          {entity.terrain && (
+          {Boolean(entity.terrain) && (
             <div>
               <span className="text-primary-gold text-sm">Terrain:</span> {entity.terrain as string}
             </div>
@@ -333,13 +333,13 @@ function LocationContent({
         )}
       </div>
 
-      {entity.description && (
+      {Boolean(entity.description) && (
         <div>
           <p>{parseHyperlinks(entity.description as string, onNavigate)}</p>
         </div>
       )}
 
-      {entity.atmosphere && (
+      {Boolean(entity.atmosphere) && (
         <div className="border-l-2 border-primary-gold/50 pl-3 italic text-parchment/80">
           {entity.atmosphere as string}
         </div>
@@ -396,8 +396,8 @@ function LocationContent({
       )}
 
       <div className="flex gap-4 text-sm">
-        {entity.climate && <span><span className="text-primary-gold">Climate:</span> {entity.climate as string}</span>}
-        {entity.explorationLevel && (
+        {Boolean(entity.climate) && <span><span className="text-primary-gold">Climate:</span> {entity.climate as string}</span>}
+        {Boolean(entity.explorationLevel) && (
           <span><span className="text-primary-gold">Exploration:</span> {entity.explorationLevel as string}</span>
         )}
       </div>
@@ -443,14 +443,14 @@ function ConflictContent({
         </div>
       </div>
 
-      {entity.rootTension && (
+      {Boolean(entity.rootTension) && (
         <div className="border border-primary-gold/30 rounded p-3 bg-primary-gold/5">
           <span className="text-primary-gold text-sm">Root Tension:</span>
           <p className="mt-1 font-semibold">{entity.rootTension as string}</p>
         </div>
       )}
 
-      {entity.publicNarrative && (
+      {Boolean(entity.publicNarrative) && (
         <div>
           <span className="text-primary-gold text-sm">What People Know:</span>
           <p className="mt-1">{parseHyperlinks(entity.publicNarrative as string, onNavigate)}</p>
@@ -464,7 +464,7 @@ function ConflictContent({
         </div>
       )}
 
-      {entity.stakes && (
+      {Boolean(entity.stakes) && (
         <div>
           <span className="text-primary-gold text-sm">Stakes:</span>
           <p className="mt-1 font-semibold">{entity.stakes as string}</p>
@@ -544,7 +544,7 @@ function SecretContent({
         <p className="mt-2">{parseHyperlinks(entity.content as string, onNavigate)}</p>
       </div>
 
-      {entity.implications && (
+      {Boolean(entity.implications) && (
         <div>
           <span className="text-primary-gold text-sm">Implications:</span>
           <p className="mt-1 italic">{entity.implications as string}</p>
@@ -603,3 +603,4 @@ function SecretContent({
     </div>
   );
 }
+

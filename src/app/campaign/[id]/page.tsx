@@ -342,6 +342,13 @@ export default function AdventurePage() {
           >
             ✨
           </button>
+          <Link 
+            href={`/campaign/${campaignId}/lore`} 
+            className="p-1.5 text-gray-500 hover:text-amber-400 transition-colors" 
+            title="World Lore"
+          >
+            📜
+          </Link>
           <Link href={`/campaign/${campaignId}/settings`} className="p-1.5 text-gray-500 hover:text-gray-300" title="Settings">
             ⚙️
           </Link>
