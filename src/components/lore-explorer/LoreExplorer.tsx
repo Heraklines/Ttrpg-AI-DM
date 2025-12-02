@@ -143,7 +143,7 @@ export function LoreExplorer({
   };
 
   return (
-    <div className="flex h-full bg-background-dark">
+    <div className="lore-explorer flex h-full bg-background-dark">
       <NavigationSidebar
         selectedCategory={selectedCategory}
         onSelectCategory={(cat) => {

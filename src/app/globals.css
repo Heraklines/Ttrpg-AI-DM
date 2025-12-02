@@ -4,6 +4,8 @@
 @tailwind components;
 @tailwind utilities;
 
+@import '../styles/lore-explorer.css';
+
 :root {
   --color-primary: #C4A35A;
   --color-secondary: #6B1C23;

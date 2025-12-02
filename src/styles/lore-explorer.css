@@ -1,0 +1,956 @@
+/* ==========================================================================
+   Lore Explorer - Fantasy Theme Styles
+   Rich visual styling for the World Lore Explorer interface
+   ========================================================================== */
+
+/* ==========================================================================
+   Base Layout & Container Styles
+   ========================================================================== */
+
+.lore-explorer {
+  background: linear-gradient(180deg, #1A1714 0%, #0D0B0A 100%);
+  min-height: 100vh;
+}
+
+.lore-explorer::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: url('/textures/parchment-noise.png') repeat;
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ==========================================================================
+   Card & Surface Styles
+   ========================================================================== */
+
+.lore-card {
+  background: linear-gradient(135deg, #3D3229 0%, #2D241E 50%, #251E18 100%);
+  border: 1px solid rgba(196, 163, 90, 0.2);
+  border-radius: 8px;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2),
+    0 4px 12px rgba(0, 0, 0, 0.4),
+    0 8px 24px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.lore-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(196, 163, 90, 0.3) 20%,
+    rgba(196, 163, 90, 0.5) 50%,
+    rgba(196, 163, 90, 0.3) 80%,
+    transparent 100%
+  );
+}
+
+.lore-card-elevated {
+  background: linear-gradient(135deg, #4A3E32 0%, #3D3229 50%, #2D241E 100%);
+  border-color: rgba(196, 163, 90, 0.3);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 8px 32px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(196, 163, 90, 0.1);
+}
+
+/* ==========================================================================
+   Typography
+   ========================================================================== */
+
+.lore-header {
+  color: #C4A35A;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.02em;
+}
+
+.lore-header-glow {
+  text-shadow:
+    0 0 10px rgba(196, 163, 90, 0.4),
+    0 0 20px rgba(196, 163, 90, 0.2),
+    0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.lore-text {
+  color: #F4E4BC;
+  font-family: 'Crimson Text', serif;
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  letter-spacing: 0.01em;
+}
+
+.lore-text-dim {
+  color: rgba(244, 228, 188, 0.6);
+}
+
+.lore-quote {
+  font-family: 'Crimson Text', serif;
+  font-style: italic;
+  color: rgba(244, 228, 188, 0.85);
+  border-left: 3px solid rgba(196, 163, 90, 0.5);
+  padding-left: 1rem;
+  margin: 1rem 0;
+}
+
+/* ==========================================================================
+   Hyperlinks - Styled as Manuscript References
+   ========================================================================== */
+
+.lore-link {
+  color: #7BA3C9;
+  text-decoration: none;
+  border-bottom: 1px dotted rgba(123, 163, 201, 0.5);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding-bottom: 1px;
+}
+
+.lore-link:hover {
+  color: #C4A35A;
+  border-bottom-color: #C4A35A;
+  border-bottom-style: solid;
+  text-shadow: 0 0 8px rgba(196, 163, 90, 0.3);
+}
+
+.lore-link:active {
+  color: #D4B86A;
+}
+
+.lore-link-subtle {
+  color: rgba(196, 163, 90, 0.8);
+  border-bottom-color: rgba(196, 163, 90, 0.3);
+}
+
+/* ==========================================================================
+   Discovery State Indicators
+   ========================================================================== */
+
+.discovery-undiscovered {
+  opacity: 0.4;
+  filter: blur(3px) grayscale(0.5);
+  pointer-events: none;
+  user-select: none;
+}
+
+.discovery-undiscovered-card {
+  background: linear-gradient(135deg, #252019 0%, #1A1714 100%);
+  border-color: rgba(100, 100, 100, 0.2);
+}
+
+.discovery-rumored {
+  opacity: 0.75;
+  filter: saturate(0.7);
+}
+
+.discovery-rumored-text {
+  font-style: italic;
+  color: rgba(244, 228, 188, 0.7);
+}
+
+.discovery-known {
+  opacity: 1;
+}
+
+.discovery-detailed {
+  opacity: 1;
+}
+
+.discovery-detailed::after {
+  content: '★';
+  color: #C4A35A;
+  margin-left: 0.5rem;
+  font-size: 0.75em;
+}
+
+/* Discovery badges */
+.discovery-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.discovery-badge-undiscovered {
+  background: rgba(100, 100, 100, 0.2);
+  color: rgba(244, 228, 188, 0.4);
+  border: 1px solid rgba(100, 100, 100, 0.3);
+}
+
+.discovery-badge-rumored {
+  background: rgba(107, 28, 35, 0.2);
+  color: #CF6679;
+  border: 1px solid rgba(107, 28, 35, 0.3);
+}
+
+.discovery-badge-known {
+  background: rgba(30, 77, 107, 0.2);
+  color: #7BA3C9;
+  border: 1px solid rgba(30, 77, 107, 0.3);
+}
+
+.discovery-badge-detailed {
+  background: rgba(196, 163, 90, 0.2);
+  color: #C4A35A;
+  border: 1px solid rgba(196, 163, 90, 0.3);
+}
+
+/* ==========================================================================
+   Tier Indicators
+   ========================================================================== */
+
+.tier-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  border-radius: 4px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tier-major {
+  background: linear-gradient(135deg, #C4A35A 0%, #A68B48 100%);
+  color: #1A1714;
+  box-shadow: 0 2px 8px rgba(196, 163, 90, 0.3);
+}
+
+.tier-supporting {
+  background: linear-gradient(135deg, #1E4D6B 0%, #163A51 100%);
+  color: #F4E4BC;
+  box-shadow: 0 2px 8px rgba(30, 77, 107, 0.3);
+}
+
+.tier-minor {
+  background: rgba(45, 36, 30, 0.8);
+  color: rgba(244, 228, 188, 0.8);
+  border: 1px solid rgba(196, 163, 90, 0.2);
+}
+
+.tier-stub {
+  background: rgba(26, 23, 20, 0.8);
+  color: rgba(244, 228, 188, 0.5);
+  border: 1px dashed rgba(196, 163, 90, 0.15);
+}
+
+/* ==========================================================================
+   Navigation Sidebar
+   ========================================================================== */
+
+.lore-sidebar {
+  background: linear-gradient(180deg, #2D241E 0%, #1A1714 100%);
+  border-right: 1px solid rgba(196, 163, 90, 0.15);
+  box-shadow: 4px 0 16px rgba(0, 0, 0, 0.3);
+}
+
+.lore-nav-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  color: rgba(244, 228, 188, 0.7);
+  font-family: 'Cinzel', serif;
+  font-size: 0.875rem;
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.lore-nav-item:hover {
+  color: #F4E4BC;
+  background: rgba(196, 163, 90, 0.08);
+  border-left-color: rgba(196, 163, 90, 0.3);
+}
+
+.lore-nav-item-active {
+  color: #C4A35A;
+  background: rgba(196, 163, 90, 0.12);
+  border-left-color: #C4A35A;
+}
+
+.lore-nav-icon {
+  width: 1.5rem;
+  margin-right: 0.75rem;
+  text-align: center;
+  font-size: 1rem;
+}
+
+.lore-nav-count {
+  margin-left: auto;
+  padding: 0.125rem 0.5rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 10px;
+  font-size: 0.6875rem;
+  font-family: 'Open Sans', sans-serif;
+  color: rgba(244, 228, 188, 0.5);
+}
+
+/* ==========================================================================
+   Entity List
+   ========================================================================== */
+
+.lore-entity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.lore-entity-item {
+  display: flex;
+  align-items: center;
+  padding: 0.625rem 0.875rem;
+  background: transparent;
+  border-radius: 6px;
+  color: rgba(244, 228, 188, 0.85);
+  font-family: 'Crimson Text', serif;
+  font-size: 0.9375rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid transparent;
+}
+
+.lore-entity-item:hover {
+  background: rgba(196, 163, 90, 0.08);
+  border-color: rgba(196, 163, 90, 0.15);
+}
+
+.lore-entity-item-selected {
+  background: rgba(196, 163, 90, 0.15);
+  border-color: rgba(196, 163, 90, 0.3);
+  color: #C4A35A;
+}
+
+.lore-entity-tier-star {
+  color: #C4A35A;
+  font-size: 0.75rem;
+  margin-left: auto;
+}
+
+/* ==========================================================================
+   Search Interface
+   ========================================================================== */
+
+.lore-search-container {
+  position: relative;
+}
+
+.lore-search-input {
+  width: 100%;
+  background: rgba(26, 23, 20, 0.8);
+  border: 1px solid rgba(196, 163, 90, 0.2);
+  border-radius: 8px;
+  padding: 0.625rem 1rem;
+  padding-right: 2.5rem;
+  color: #F4E4BC;
+  font-family: 'Crimson Text', serif;
+  font-size: 0.9375rem;
+  transition: all 0.2s ease;
+}
+
+.lore-search-input::placeholder {
+  color: rgba(244, 228, 188, 0.4);
+}
+
+.lore-search-input:focus {
+  outline: none;
+  border-color: rgba(196, 163, 90, 0.5);
+  box-shadow: 0 0 0 3px rgba(196, 163, 90, 0.1);
+}
+
+.lore-search-icon {
+  position: absolute;
+  right: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: rgba(244, 228, 188, 0.4);
+  pointer-events: none;
+}
+
+.lore-search-results {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  left: 0;
+  right: 0;
+  background: #2D241E;
+  border: 1px solid rgba(196, 163, 90, 0.2);
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  max-height: 24rem;
+  overflow-y: auto;
+  z-index: 100;
+}
+
+/* ==========================================================================
+   View Mode Toggle
+   ========================================================================== */
+
+.lore-view-toggle {
+  display: flex;
+  background: rgba(26, 23, 20, 0.8);
+  border-radius: 8px;
+  padding: 0.25rem;
+  gap: 0.25rem;
+}
+
+.lore-view-toggle-btn {
+  padding: 0.5rem 0.875rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: rgba(244, 228, 188, 0.6);
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+}
+
+.lore-view-toggle-btn:hover {
+  color: #F4E4BC;
+}
+
+.lore-view-toggle-btn-active-player {
+  background: linear-gradient(135deg, #1E4D6B 0%, #163A51 100%);
+  color: #F4E4BC;
+  box-shadow: 0 2px 8px rgba(30, 77, 107, 0.4);
+}
+
+.lore-view-toggle-btn-active-dm {
+  background: linear-gradient(135deg, #C4A35A 0%, #A68B48 100%);
+  color: #1A1714;
+  box-shadow: 0 2px 8px rgba(196, 163, 90, 0.4);
+}
+
+/* ==========================================================================
+   DM-Only Content Styling
+   ========================================================================== */
+
+.lore-dm-only {
+  background: linear-gradient(135deg, rgba(207, 102, 121, 0.08) 0%, rgba(207, 102, 121, 0.04) 100%);
+  border: 1px solid rgba(207, 102, 121, 0.25);
+  border-radius: 6px;
+  padding: 1rem;
+  margin: 1rem 0;
+}
+
+.lore-dm-only::before {
+  content: '🔒';
+  margin-right: 0.5rem;
+}
+
+.lore-dm-only-label {
+  color: #CF6679;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.lore-secret-content {
+  background: linear-gradient(135deg, rgba(207, 102, 121, 0.12) 0%, rgba(207, 102, 121, 0.06) 100%);
+  border: 1px solid rgba(207, 102, 121, 0.3);
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+/* ==========================================================================
+   Tension Display
+   ========================================================================== */
+
+.lore-tension-card {
+  background: linear-gradient(135deg, rgba(196, 163, 90, 0.08) 0%, rgba(196, 163, 90, 0.04) 100%);
+  border: 1px solid rgba(196, 163, 90, 0.25);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.lore-tension-name {
+  color: #C4A35A;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.lore-tension-stance {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+}
+
+.lore-tension-stance-label {
+  color: rgba(244, 228, 188, 0.6);
+  min-width: 5rem;
+}
+
+.lore-tension-stance-value {
+  color: #F4E4BC;
+}
+
+/* ==========================================================================
+   Relationship Graph Styling
+   ========================================================================== */
+
+.lore-graph-container {
+  background: linear-gradient(135deg, #1A1714 0%, #0D0B0A 100%);
+  border-radius: 8px;
+  border: 1px solid rgba(196, 163, 90, 0.15);
+  overflow: hidden;
+}
+
+.lore-graph-node {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.lore-graph-node:hover {
+  transform: scale(1.1);
+}
+
+.lore-graph-node-label {
+  fill: #F4E4BC;
+  font-family: 'Crimson Text', serif;
+  font-size: 12px;
+  pointer-events: none;
+  text-anchor: middle;
+}
+
+.lore-graph-edge-ally {
+  stroke: #4CAF50;
+  stroke-opacity: 0.6;
+}
+
+.lore-graph-edge-enemy {
+  stroke: #CF6679;
+  stroke-opacity: 0.6;
+}
+
+.lore-graph-edge-rival {
+  stroke: #FFC107;
+  stroke-opacity: 0.6;
+}
+
+.lore-graph-edge-neutral {
+  stroke: rgba(244, 228, 188, 0.3);
+}
+
+/* ==========================================================================
+   Map View Styling
+   ========================================================================== */
+
+.lore-map-container {
+  background: linear-gradient(135deg, #1A1714 0%, #0D0B0A 100%);
+  border-radius: 8px;
+  border: 1px solid rgba(196, 163, 90, 0.15);
+  overflow: hidden;
+  position: relative;
+}
+
+.lore-map-fog {
+  fill: rgba(26, 23, 20, 0.85);
+  transition: opacity 0.3s ease;
+}
+
+.lore-map-fog-discovered {
+  opacity: 0;
+}
+
+.lore-map-fog-rumored {
+  opacity: 0.5;
+  fill: rgba(26, 23, 20, 0.6);
+}
+
+.lore-map-region {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lore-map-region:hover {
+  filter: brightness(1.2);
+  stroke: #C4A35A;
+  stroke-width: 2px;
+}
+
+.lore-map-marker {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.lore-map-marker:hover {
+  transform: scale(1.2);
+}
+
+.lore-map-label {
+  fill: #F4E4BC;
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  pointer-events: none;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* Map info card popup */
+.lore-map-info-card {
+  position: absolute;
+  background: #2D241E;
+  border: 1px solid rgba(196, 163, 90, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  min-width: 200px;
+  max-width: 300px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  z-index: 50;
+  pointer-events: auto;
+}
+
+.lore-map-info-card::before {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 8px solid rgba(196, 163, 90, 0.3);
+}
+
+.lore-map-info-card::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid #2D241E;
+}
+
+/* Map layer controls */
+.lore-map-layers {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(45, 36, 30, 0.95);
+  border: 1px solid rgba(196, 163, 90, 0.2);
+  border-radius: 8px;
+  padding: 0.75rem;
+  z-index: 40;
+}
+
+.lore-map-layer-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 4px;
+  font-size: 0.8125rem;
+  color: rgba(244, 228, 188, 0.7);
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+}
+
+.lore-map-layer-btn:hover {
+  background: rgba(196, 163, 90, 0.1);
+  color: #F4E4BC;
+}
+
+.lore-map-layer-btn-active {
+  background: rgba(196, 163, 90, 0.15);
+  color: #C4A35A;
+}
+
+/* ==========================================================================
+   Timeline View Styling
+   ========================================================================== */
+
+.lore-timeline-container {
+  background: linear-gradient(180deg, #2D241E 0%, #1A1714 100%);
+  border-radius: 8px;
+  border: 1px solid rgba(196, 163, 90, 0.15);
+  overflow: hidden;
+  padding: 1.5rem;
+}
+
+.lore-timeline-track {
+  position: relative;
+  height: 4px;
+  background: rgba(196, 163, 90, 0.2);
+  border-radius: 2px;
+  margin: 2rem 0;
+}
+
+.lore-timeline-era {
+  position: absolute;
+  top: -2rem;
+  transform: translateX(-50%);
+  text-align: center;
+}
+
+.lore-timeline-era-marker {
+  width: 12px;
+  height: 12px;
+  background: #C4A35A;
+  border-radius: 50%;
+  margin: 0 auto 0.5rem;
+  box-shadow: 0 0 8px rgba(196, 163, 90, 0.5);
+}
+
+.lore-timeline-era-label {
+  color: #C4A35A;
+  font-family: 'Cinzel', serif;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.lore-timeline-era-date {
+  color: rgba(244, 228, 188, 0.5);
+  font-size: 0.6875rem;
+  margin-top: 0.25rem;
+}
+
+.lore-timeline-event {
+  position: absolute;
+  top: 1rem;
+  transform: translateX(-50%);
+}
+
+.lore-timeline-event-dot {
+  width: 8px;
+  height: 8px;
+  background: #7BA3C9;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.lore-timeline-event-dot:hover {
+  transform: scale(1.5);
+  background: #C4A35A;
+  box-shadow: 0 0 12px rgba(196, 163, 90, 0.5);
+}
+
+.lore-timeline-event-card {
+  position: absolute;
+  top: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #2D241E;
+  border: 1px solid rgba(196, 163, 90, 0.3);
+  border-radius: 8px;
+  padding: 1rem;
+  min-width: 250px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  z-index: 30;
+}
+
+/* ==========================================================================
+   Sensory Details Panel
+   ========================================================================== */
+
+.lore-sensory-panel {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.lore-sensory-item {
+  background: rgba(26, 23, 20, 0.5);
+  border-radius: 6px;
+  padding: 0.875rem;
+}
+
+.lore-sensory-icon {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.lore-sensory-label {
+  color: #C4A35A;
+  font-size: 0.6875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.375rem;
+}
+
+.lore-sensory-text {
+  color: rgba(244, 228, 188, 0.85);
+  font-family: 'Crimson Text', serif;
+  font-size: 0.875rem;
+  font-style: italic;
+  line-height: 1.5;
+}
+
+/* ==========================================================================
+   Scrollbar Styling
+   ========================================================================== */
+
+.lore-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.lore-scrollbar::-webkit-scrollbar-track {
+  background: rgba(26, 23, 20, 0.5);
+  border-radius: 4px;
+}
+
+.lore-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(196, 163, 90, 0.3);
+  border-radius: 4px;
+}
+
+.lore-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(196, 163, 90, 0.5);
+}
+
+/* ==========================================================================
+   Animations
+   ========================================================================== */
+
+@keyframes lore-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes lore-glow-pulse {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(196, 163, 90, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(196, 163, 90, 0.5);
+  }
+}
+
+@keyframes lore-shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+.lore-animate-fade-in {
+  animation: lore-fade-in 0.3s ease-out forwards;
+}
+
+.lore-animate-glow {
+  animation: lore-glow-pulse 2s infinite;
+}
+
+.lore-loading-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(45, 36, 30, 0) 0%,
+    rgba(196, 163, 90, 0.1) 50%,
+    rgba(45, 36, 30, 0) 100%
+  );
+  background-size: 200% 100%;
+  animation: lore-shimmer 1.5s infinite;
+}
+
+/* ==========================================================================
+   Responsive Adjustments
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  .lore-sensory-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .lore-map-info-card {
+    max-width: calc(100vw - 2rem);
+  }
+
+  .lore-view-toggle {
+    width: 100%;
+  }
+
+  .lore-view-toggle-btn {
+    flex: 1;
+    text-align: center;
+  }
+}
+
+/* ==========================================================================
+   Utility Classes
+   ========================================================================== */
+
+.lore-divider {
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(196, 163, 90, 0.3) 20%,
+    rgba(196, 163, 90, 0.3) 80%,
+    transparent 100%
+  );
+  margin: 1.5rem 0;
+}
+
+.lore-divider-vertical {
+  width: 1px;
+  height: 100%;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(196, 163, 90, 0.3) 20%,
+    rgba(196, 163, 90, 0.3) 80%,
+    transparent 100%
+  );
+}
+
+.lore-highlight-gold {
+  color: #C4A35A;
+}
+
+.lore-highlight-blue {
+  color: #7BA3C9;
+}
+
+.lore-highlight-red {
+  color: #CF6679;
+}
+
+.lore-highlight-green {
+  color: #4CAF50;
+}
+
+.lore-bg-glow {
+  background: radial-gradient(
+    ellipse at center,
+    rgba(196, 163, 90, 0.08) 0%,
+    transparent 70%
+  );
+}
