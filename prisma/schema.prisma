@@ -19,6 +19,7 @@ model Campaign {
   gameState       GameState?
   sessions        Session[]
   lore            CampaignLore?
+  worldSeed       WorldSeed?
 }
 
 model Character {
@@ -157,7 +158,306 @@ model CampaignTemplate {
 }
 
 // ============================================================
-// CAMPAIGN LORE GENERATION SYSTEM
+// WORLD SEED SYSTEM - Tension-First Generation
+// ============================================================
+
+model WorldSeed {
+  id              String   @id @default(uuid())
+  campaignId      String   @unique
+  campaign        Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  
+  name            String?
+  tone            String   @default("heroic")
+  scale           String   @default("regional")
+  themes          String   @default("[]")
+  
+  coreTensions    String   @default("[]")
+  creationMyth    String?
+  
+  generationStatus String  @default("pending")
+  currentPhase    String?
+  generationError String?
+  
+  geography       WorldGeography?
+  cosmology       WorldCosmology?
+  history         WorldHistory?
+  factions        WorldFaction[]
+  locations       WorldLocation[]
+  npcs            WorldNpc[]
+  conflicts       WorldConflict[]
+  secrets         WorldSecret[]
+  relationships   WorldRelationship[]
+  
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model WorldGeography {
+  id              String    @id @default(uuid())
+  worldSeedId     String    @unique
+  worldSeed       WorldSeed @relation(fields: [worldSeedId], references: [id], onDelete: Cascade)
+  
+  heightmapSeed   Int       @default(0)
+  mapSettings     String    @default("{}")
+  mapData         String?
+  svgCache        String?
+  
+  continents      String    @default("[]")
+  oceans          String    @default("[]")
+  majorRegions    String    @default("[]")
+  
+  naturalLaws     String    @default("{}")
+  magicGeography  String    @default("[]")
+  
+  updatedAt       DateTime  @updatedAt
+}
+
+model WorldCosmology {
+  id              String    @id @default(uuid())
+  worldSeedId     String    @unique
+  worldSeed       WorldSeed @relation(fields: [worldSeedId], references: [id], onDelete: Cascade)
+  
+  planarStructure String    @default("{}")
+  magicSystem     String    @default("{}")
+  
+  pantheon        String    @default("[]")
+  
+  creationStory   String?
+  prophecies      String    @default("[]")
+  afterlife       String    @default("{}")
+  
+  updatedAt       DateTime  @updatedAt
+}
+
+model WorldHistory {
+  id              String    @id @default(uuid())
+  worldSeedId     String    @unique
+  worldSeed       WorldSeed @relation(fields: [worldSeedId], references: [id], onDelete: Cascade)
+  
+  eras            String    @default("[]")
+  majorEvents     String    @default("[]")
+  
+  writtenBy       String    @default("[]")
+  lostKnowledge   String    @default("[]")
+  
+  updatedAt       DateTime  @updatedAt
+}
+
+model WorldFaction {
+  id              String    @id @default(uuid())
+  worldSeedId     String
+  worldSeed       WorldSeed @relation(fields: [worldSeedId], references: [id], onDelete: Cascade)
+  
+  tier            String    @default("supporting")
+  
+  name            String
+  type            String
+  philosophy      String?
+  
+  tensionStances  String    @default("[]")
+  
+  leadership      String    @default("{}")
+  ranks           String    @default("[]")
+  membership      String    @default("{}")
+  
+  resources       String    @default("[]")
+  territory       String    @default("[]")
+  factionSecrets  String    @default("[]")
+  
+  publicImage     String?
+  symbol          String?
+  motto           String?
+  influence       Int       @default(5)
+  
+  isDiscovered    Boolean   @default(false)
+  discoveredAt    DateTime?
+  
+  members         WorldNpc[]
+  
+  @@index([worldSeedId])
+  @@index([tier])
+}
+
+model WorldNpc {
+  id              String    @id @default(uuid())
+  worldSeedId     String
+  worldSeed       WorldSeed @relation(fields: [worldSeedId], references: [id], onDelete: Cascade)
+  
+  tier            String    @default("minor")
+  
+  name            String
+  race            String?
+  occupation      String?
+  age             String?
+  appearance      String?
+  
+  personality     String    @default("{}")
+  speakingStyle   String?
+  mannerisms      String    @default("[]")
+  
+  publicGoal      String?
+  privateGoal     String?
+  fears           String    @default("[]")
+  tensionRole     String    @default("[]")
+  
+  factionId       String?
+  faction         WorldFaction? @relation(fields: [factionId], references: [id])
+  factionRank     String?
+  primaryLocationId String?
+  
+  knowledgeScope  String    @default("{}")
+  defaultAttitude String    @default("neutral")
+  
+  npcSecrets      String    @default("[]")
+  hiddenIdentity  String?
+  
+  isDiscovered    Boolean   @default(false)
+  discoveredAt    DateTime?
+  relationshipLevel String  @default("unknown")
+  
+  @@index([worldSeedId])
+  @@index([factionId])
+  @@index([tier])
+}
+
+model WorldLocation {
+  id              String    @id @default(uuid())
+  worldSeedId     String
+  worldSeed       WorldSeed @relation(fields: [worldSeedId], references: [id], onDelete: Cascade)
+  
+  tier            String    @default("minor")
+  type            String
+  
+  parentId        String?
+  parent          WorldLocation? @relation("LocationHierarchy", fields: [parentId], references: [id])
+  children        WorldLocation[] @relation("LocationHierarchy")
+  
+  mapCoordinates  String    @default("{}")
+  terrain         String?
+  climate         String?
+  size            String?
+  
+  name            String
+  description     String?
+  atmosphere      String?
+  sensoryDetails  String    @default("{}")
+  
+  controllingFactionId String?
+  contestedBy     String    @default("[]")
+  population      String    @default("{}")
+  economy         String    @default("{}")
+  
+  landmarks       String    @default("[]")
+  currentEvents   String    @default("[]")
+  rumors          String    @default("[]")
+  locationSecrets String    @default("[]")
+  
+  isDiscovered    Boolean   @default(false)
+  discoveredAt    DateTime?
+  explorationLevel String   @default("unknown")
+  
+  @@index([worldSeedId])
+  @@index([parentId])
+  @@index([type])
+}
+
+model WorldConflict {
+  id              String    @id @default(uuid())
+  worldSeedId     String
+  worldSeed       WorldSeed @relation(fields: [worldSeedId], references: [id], onDelete: Cascade)
+  
+  tier            String    @default("supporting")
+  
+  name            String
+  type            String
+  scope           String    @default("regional")
+  status          String    @default("brewing")
+  
+  rootTension     String?
+  triggerEvent    String?
+  
+  sides           String    @default("[]")
+  neutrals        String    @default("[]")
+  
+  stakes          String?
+  publicNarrative String?
+  trueNature      String?
+  
+  timeline        String    @default("[]")
+  currentState    String?
+  possibleOutcomes String   @default("[]")
+  
+  playerInfluence String    @default("[]")
+  
+  affectedLocationIds String @default("[]")
+  
+  isDiscovered    Boolean   @default(false)
+  discoveredAt    DateTime?
+  knowledgeLevel  String    @default("unaware")
+  
+  @@index([worldSeedId])
+  @@index([status])
+}
+
+model WorldSecret {
+  id              String    @id @default(uuid())
+  worldSeedId     String
+  worldSeed       WorldSeed @relation(fields: [worldSeedId], references: [id], onDelete: Cascade)
+  
+  tier            String    @default("supporting")
+  type            String
+  
+  name            String
+  content         String
+  implications    String?
+  
+  tensionImpact   String    @default("[]")
+  
+  knownBy         String    @default("[]")
+  suspectedBy     String    @default("[]")
+  
+  hints           String    @default("[]")
+  discoveryConditions String @default("[]")
+  revealTriggers  String    @default("[]")
+  
+  onReveal        String    @default("{}")
+  
+  isRevealed      Boolean   @default(false)
+  partialReveals  String    @default("[]")
+  revealedAt      DateTime?
+  
+  @@index([worldSeedId])
+  @@index([isRevealed])
+}
+
+model WorldRelationship {
+  id              String    @id @default(uuid())
+  worldSeedId     String
+  worldSeed       WorldSeed @relation(fields: [worldSeedId], references: [id], onDelete: Cascade)
+  
+  sourceType      String
+  sourceId        String
+  targetType      String
+  targetId        String
+  
+  type            String
+  strength        Int       @default(5)
+  isPublic        Boolean   @default(true)
+  
+  description     String?
+  history         String?
+  instability     String?
+  
+  isDiscovered    Boolean   @default(false)
+  discoveredAt    DateTime?
+  
+  @@index([worldSeedId])
+  @@index([sourceType, sourceId])
+  @@index([targetType, targetId])
+}
+
+// ============================================================
+// CAMPAIGN LORE GENERATION SYSTEM (Legacy - kept for compatibility)
 // ============================================================
 
 model CampaignLore {
@@ -198,33 +498,32 @@ model LoreNpc {
   campaignLore    CampaignLore @relation(fields: [campaignLoreId], references: [id], onDelete: Cascade)
   
   name            String
-  role            String       // innkeeper, villain, mentor, quest_giver, merchant, guard, noble, etc.
-  importance      String       @default("minor") // major, supporting, minor
+  role            String
+  importance      String       @default("minor")
+  tier            String       @default("minor")
   
-  // Personality
-  personality     String       @default("{}") // {traits: [], ideals: [], bonds: [], flaws: []}
-  speakingStyle   String?      // How they talk (formal, gruff, nervous, etc.)
-  quirks          String       @default("[]") // Memorable behaviors
+  personality     String       @default("{}")
+  speakingStyle   String?
+  quirks          String       @default("[]")
   
-  // Motivations
-  publicGoal      String?      // What they appear to want
-  secretGoal      String?      // What they actually want
+  publicGoal      String?
+  secretGoal      String?
   fears           String       @default("[]")
+  tensionStances  String       @default("[]")
+  tensionRole     String       @default("[]")
   
-  // Relationships
-  relationships   String       @default("[]") // Array of {npcId, relationship, description}
-  factionId       String?      // Primary faction affiliation
+  relationships   String       @default("[]")
+  factionId       String?
   
-  // Location
-  primaryLocation String?      // Where they're usually found
+  primaryLocation String?
   
-  // Physical
   race            String?
   appearance      String?
   
-  // Narrative state
-  isRevealed      Boolean      @default(false) // Has player met them?
-  playerRelation  String?      // friendly, neutral, hostile, unknown
+  isRevealed      Boolean      @default(false)
+  isDiscovered    Boolean      @default(false)
+  discoveredAt    DateTime?
+  playerRelation  String?
   
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
@@ -232,6 +531,7 @@ model LoreNpc {
   @@index([campaignLoreId])
   @@index([importance])
   @@index([role])
+  @@index([tier])
 }
 
 model LoreFaction {
@@ -240,37 +540,39 @@ model LoreFaction {
   campaignLore    CampaignLore @relation(fields: [campaignLoreId], references: [id], onDelete: Cascade)
   
   name            String
-  type            String       // guild, religion, government, criminal, military, merchant, academic, secret_society
-  importance      String       @default("minor") // major, supporting, minor
+  type            String
+  importance      String       @default("minor")
+  tier            String       @default("supporting")
   
-  // Identity
-  publicImage     String?      // How they present themselves
-  secretNature    String?      // What they really are
-  symbol          String?      // Visual identifier
+  publicImage     String?
+  secretNature    String?
+  symbol          String?
   motto           String?
+  philosophy      String?
   
-  // Goals & Methods
-  goals           String       @default("[]") // Array of objectives
-  methods         String       @default("[]") // How they achieve goals
-  resources       String       @default("[]") // Money, soldiers, magic, etc.
+  tensionStances  String       @default("[]")
   
-  // Relationships
-  allies          String       @default("[]") // Array of faction names
-  enemies         String       @default("[]") // Array of faction names
+  goals           String       @default("[]")
+  methods         String       @default("[]")
+  resources       String       @default("[]")
   
-  // Territory
-  headquarters    String?      // Primary location
-  territory       String       @default("[]") // Array of location names
-  influence       Int          @default(5) // 1-10 scale of power
+  allies          String       @default("[]")
+  enemies         String       @default("[]")
   
-  // Narrative state
-  playerStanding  String?      // friendly, neutral, hostile, unknown
+  headquarters    String?
+  territory       String       @default("[]")
+  influence       Int          @default(5)
+  
+  playerStanding  String?
+  isDiscovered    Boolean      @default(false)
+  discoveredAt    DateTime?
   
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
   
   @@index([campaignLoreId])
   @@index([type])
+  @@index([tier])
 }
 
 model LoreLocation {
@@ -279,34 +581,37 @@ model LoreLocation {
   campaignLore    CampaignLore @relation(fields: [campaignLoreId], references: [id], onDelete: Cascade)
   
   name            String
-  locationType    String       // city, town, village, dungeon, wilderness, landmark, ruins, fortress
-  importance      String       @default("minor") // major, supporting, minor
+  locationType    String
+  importance      String       @default("minor")
+  tier            String       @default("minor")
   
-  // Description
-  description     String?      // General description
-  atmosphere      String?      // Mood/feel of the place
-  sensoryDetails  String       @default("{}") // {sights, sounds, smells}
+  parentId        String?
+  parent          LoreLocation? @relation("LoreLocationHierarchy", fields: [parentId], references: [id])
+  children        LoreLocation[] @relation("LoreLocationHierarchy")
   
-  // Geography
-  region          String?      // Broader area it belongs to
-  terrain         String?      // Mountains, forest, coastal, etc.
+  mapCoordinates  String       @default("{}")
+  
+  description     String?
+  atmosphere      String?
+  sensoryDetails  String       @default("{}")
+  
+  region          String?
+  terrain         String?
   climate         String?
-  connectedTo     String       @default("[]") // Array of {locationName, direction, travelTime}
+  connectedTo     String       @default("[]")
   
-  // Significance
-  historicalNote  String?      // Historical importance
-  currentEvents   String       @default("[]") // What's happening now
+  historicalNote  String?
+  currentEvents   String       @default("[]")
   
-  // Population
-  population      String?      // Size/composition
-  notableNpcs     String       @default("[]") // Array of NPC names present here
-  factionPresence String       @default("[]") // Array of {factionName, influence}
+  population      String?
+  notableNpcs     String       @default("[]")
+  factionPresence String       @default("[]")
   
-  // Secrets
-  hiddenSecrets   String       @default("[]") // Array of secret names
+  hiddenSecrets   String       @default("[]")
   
-  // Narrative state
-  isDiscovered    Boolean      @default(false) // Has player been here?
+  isDiscovered    Boolean      @default(false)
+  discoveredAt    DateTime?
+  explorationLevel String      @default("unknown")
   
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
@@ -314,6 +619,8 @@ model LoreLocation {
   @@index([campaignLoreId])
   @@index([locationType])
   @@index([region])
+  @@index([parentId])
+  @@index([tier])
 }
 
 model LoreConflict {
@@ -322,29 +629,29 @@ model LoreConflict {
   campaignLore    CampaignLore @relation(fields: [campaignLoreId], references: [id], onDelete: Cascade)
   
   name            String
-  type            String       // war, political, personal, ideological, economic, supernatural
-  scope           String       @default("regional") // local, regional, world
-  importance      String       @default("supporting") // major (campaign-defining), supporting, minor
+  type            String
+  scope           String       @default("regional")
+  importance      String       @default("supporting")
+  tier            String       @default("supporting")
   
-  // Parties
-  participants    String       @default("[]") // Array of {type: 'faction'|'npc', name, role: 'aggressor'|'defender'|'neutral'}
+  rootTension     String?
   
-  // Stakes
-  stakes          String?      // What's at risk
-  publicKnowledge String?      // What people generally know
-  trueNature      String?      // The reality of the situation
+  participants    String       @default("[]")
   
-  // State
-  currentState    String       @default("brewing") // brewing, active, climax, resolved
-  recentEvents    String       @default("[]") // Recent developments
+  stakes          String?
+  publicKnowledge String?
+  trueNature      String?
   
-  // Resolution
-  possibleOutcomes String      @default("[]") // Array of potential resolutions
-  playerInfluence  String?     // How players might affect this
+  currentState    String       @default("brewing")
+  recentEvents    String       @default("[]")
   
-  // Narrative state
-  isRevealed      Boolean      @default(false) // Are players aware?
-  playerStance    String?      // which side (if any) players have taken
+  possibleOutcomes String      @default("[]")
+  playerInfluence  String?
+  
+  isRevealed      Boolean      @default(false)
+  isDiscovered    Boolean      @default(false)
+  discoveredAt    DateTime?
+  playerStance    String?
   
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
@@ -352,6 +659,7 @@ model LoreConflict {
   @@index([campaignLoreId])
   @@index([type])
   @@index([currentState])
+  @@index([tier])
 }
 
 model LoreSecret {
@@ -359,26 +667,28 @@ model LoreSecret {
   campaignLoreId  String
   campaignLore    CampaignLore @relation(fields: [campaignLoreId], references: [id], onDelete: Cascade)
   
-  name            String       // Internal reference name
-  type            String       // plot_twist, hidden_identity, forbidden_knowledge, treasure, betrayal
-  importance      String       @default("supporting") // major, supporting, minor
+  name            String
+  type            String
+  importance      String       @default("supporting")
+  tier            String       @default("supporting")
   
-  // Content
-  content         String       // The actual secret
-  hints           String       @default("[]") // Array of clues that point to this
+  content         String
+  implications    String?
+  hints           String       @default("[]")
   
-  // Connections
-  relatedNpcs     String       @default("[]") // NPC names who know or are affected
-  relatedFactions String       @default("[]") // Faction names involved
-  relatedLocations String      @default("[]") // Location names where evidence might be found
+  tensionImpact   String       @default("[]")
   
-  // Discovery
-  discoveryConditions String   @default("[]") // What triggers reveal
-  revealImpact    String?      // What happens when revealed
+  relatedNpcs     String       @default("[]")
+  relatedFactions String       @default("[]")
+  relatedLocations String      @default("[]")
   
-  // State
+  discoveryConditions String   @default("[]")
+  revealImpact    String?
+  
   isRevealed      Boolean      @default(false)
-  partiallyKnown  String       @default("[]") // Which hints have been discovered
+  isDiscovered    Boolean      @default(false)
+  discoveredAt    DateTime?
+  partiallyKnown  String       @default("[]")
   
   createdAt       DateTime     @default(now())
   updatedAt       DateTime     @updatedAt
@@ -386,4 +696,5 @@ model LoreSecret {
   @@index([campaignLoreId])
   @@index([type])
   @@index([isRevealed])
+  @@index([tier])
 }
