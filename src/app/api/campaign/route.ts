@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { z } from 'zod';
+import { loreGenerationQueue, loreGenerationService } from '@/lib/lore';
 
 const CreateCampaignSchema = z.object({
   name: z.string().min(1).max(100),
@@ -76,6 +77,24 @@ export async function POST(request: NextRequest) {
         },
       },
     });
+
+    // Auto-trigger lore generation if description is substantial (>= 50 chars)
+    if (parsed.data.description && parsed.data.description.length >= 50) {
+      // Enqueue and start generation asynchronously (don't block response)
+      loreGenerationQueue.enqueue(campaign.id).then(async (result) => {
+        if (result.success && !result.alreadyExists) {
+          console.log(`Starting lore generation for campaign ${campaign.id}`);
+          // Run generation in background
+          loreGenerationService.generateLore(campaign.id).then((genResult) => {
+            if (genResult.success) {
+              console.log(`Lore generation completed for campaign ${campaign.id}`);
+            } else {
+              console.error(`Lore generation failed for campaign ${campaign.id}:`, genResult.error);
+            }
+          });
+        }
+      });
+    }
 
     return NextResponse.json({ campaign }, { status: 201 });
   } catch (error) {

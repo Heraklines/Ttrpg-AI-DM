@@ -9,6 +9,7 @@
 
 import type { Character, Combat } from '@/lib/engine/types';
 import type { GameMap, MapEntity } from '@/lib/engine/spatial-types';
+import { loreContextManager } from '@/lib/lore';
 
 export interface ValidationIssue {
   ruleId: string;
@@ -108,6 +109,28 @@ const VALIDATION_RULES: ValidationRule[] = [
 
 export class StateGuardian {
   /**
+   * Fetch lore context for a campaign (call this before generateContextInjection)
+   */
+  async getLoreContext(campaignId: string, currentLocation?: string): Promise<string | null> {
+    try {
+      const loreContext = await loreContextManager.getRelevantLore(campaignId, {
+        currentLocation
+      });
+      
+      if (!loreContext) return null;
+      
+      return `
+═══ WORLD LORE ═══
+${loreContext.tier1}
+
+${loreContext.tier2 ? `═══ LOCAL CONTEXT ═══\n${loreContext.tier2}` : ''}`;
+    } catch (error) {
+      console.error('Error fetching lore context:', error);
+      return null;
+    }
+  }
+
+  /**
    * Generate context injection for the AI prompt
    */
   generateContextInjection(context: {
@@ -124,6 +147,7 @@ export class StateGuardian {
       activeMap?: GameMap | null;
       currentLocationId?: string | null;
     };
+    loreContext?: string | null; // Pre-fetched lore context
   }): string {
     const sections: string[] = [];
 
@@ -173,6 +197,12 @@ ${this.generatePartyStatus(context.characters)}`);
       sections.push(`
 ═══ RECENT EVENTS ═══
 ${recentSummary}`);
+    }
+
+    // Inject world lore context if available
+    if (context.loreContext) {
+      sections.push(`
+${context.loreContext}`);
     }
 
     // Reminders based on state

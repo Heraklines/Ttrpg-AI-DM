@@ -2,6 +2,7 @@
 
 import { diceEngine } from '@/lib/engine/dice-engine';
 import { combatEngine } from '@/lib/engine/combat-engine';
+import { loreContextManager } from '@/lib/lore';
 import type { Character, Combat, ActiveCondition, Ability, Skill, DamageType } from '@/lib/engine/types';
 
 interface FunctionCall {
@@ -19,6 +20,7 @@ interface FunctionResult {
 interface ExecutionContext {
   characters: Map<string, Character>;
   combat: Combat | null;
+  campaignId?: string;  // Added for lore functions
   updateCharacter: (id: string, updates: Partial<Character>) => void;
   updateCombat: (combat: Combat | null) => void;
 }
@@ -713,6 +715,71 @@ export function executeFunction(call: FunctionCall, context: ExecutionContext): 
         };
       }
 
+      // ==================== LORE FUNCTIONS ====================
+
+      case 'recall_lore': {
+        const topic = args.topic as string;
+        const type = args.type as 'npc' | 'faction' | 'location' | 'conflict' | 'secret' | undefined;
+        
+        if (!context.campaignId) {
+          return { name, success: false, result: null, displayText: 'No campaign context for lore lookup' };
+        }
+        
+        // Note: This is async but executeFunction is sync - we return a promise marker
+        // The orchestrator should handle this specially or we use a sync cache
+        return {
+          name,
+          success: true,
+          result: { topic, type, campaignId: context.campaignId, async: true },
+          displayText: `📜 Recalling lore about: ${topic}${type ? ` (${type})` : ''}`,
+        };
+      }
+
+      case 'introduce_npc': {
+        const npcName = args.npc_name as string;
+        
+        if (!context.campaignId) {
+          return { name, success: false, result: null, displayText: 'No campaign context for NPC introduction' };
+        }
+        
+        return {
+          name,
+          success: true,
+          result: { npcName, campaignId: context.campaignId, async: true },
+          displayText: `👤 Introducing NPC: ${npcName}`,
+        };
+      }
+
+      case 'discover_location': {
+        const locationName = args.location_name as string;
+        
+        if (!context.campaignId) {
+          return { name, success: false, result: null, displayText: 'No campaign context for location discovery' };
+        }
+        
+        return {
+          name,
+          success: true,
+          result: { locationName, campaignId: context.campaignId, async: true },
+          displayText: `🗺️ Discovered location: ${locationName}`,
+        };
+      }
+
+      case 'reveal_secret': {
+        const secretName = args.secret_name as string;
+        
+        if (!context.campaignId) {
+          return { name, success: false, result: null, displayText: 'No campaign context for secret reveal' };
+        }
+        
+        return {
+          name,
+          success: true,
+          result: { secretName, campaignId: context.campaignId, async: true },
+          displayText: `🔮 Secret revealed: ${secretName}`,
+        };
+      }
+
       // ==================== SPATIAL FUNCTIONS ====================
       
       case 'get_position': {
@@ -867,6 +934,7 @@ export function parseFunctionCalls(text: string): FunctionCall[] {
     'lookup_monster', 'lookup_spell', 'lookup_condition',
     'get_position', 'move_entity', 'get_distance', 'check_line_of_sight',
     'get_entities_in_range', 'create_area_effect', 'get_path', 'reveal_area',
+    'recall_lore', 'introduce_npc', 'discover_location', 'reveal_secret',
   ];
   
   let match;
@@ -906,6 +974,7 @@ export function stripFunctionCalls(text: string): string {
     'lookup_monster', 'lookup_spell', 'lookup_condition',
     'get_position', 'move_entity', 'get_distance', 'check_line_of_sight',
     'get_entities_in_range', 'create_area_effect', 'get_path', 'reveal_area',
+    'recall_lore', 'introduce_npc', 'discover_location', 'reveal_secret',
   ];
   
   let cleaned = text;
@@ -917,4 +986,59 @@ export function stripFunctionCalls(text: string): string {
   cleaned = cleaned.replace(/\n{3,}/g, '\n\n').trim();
   
   return cleaned;
+}
+
+
+/**
+ * Execute async lore functions that require database queries.
+ * Call this after executeFunction for any lore function results that have async: true.
+ */
+export async function executeLoreFunction(
+  functionName: string,
+  result: Record<string, unknown>
+): Promise<{ success: boolean; data: string }> {
+  const campaignId = result.campaignId as string;
+  
+  if (!campaignId) {
+    return { success: false, data: 'No campaign context' };
+  }
+
+  switch (functionName) {
+    case 'recall_lore': {
+      const topic = result.topic as string;
+      const type = result.type as 'npc' | 'faction' | 'location' | 'conflict' | 'secret' | undefined;
+      const loreData = await loreContextManager.queryLore(campaignId, topic, type);
+      return { success: true, data: loreData };
+    }
+
+    case 'introduce_npc': {
+      const npcName = result.npcName as string;
+      const npcData = await loreContextManager.revealNpc(campaignId, npcName);
+      return { 
+        success: npcData !== null, 
+        data: npcData || `NPC "${npcName}" not found in world lore.`
+      };
+    }
+
+    case 'discover_location': {
+      const locationName = result.locationName as string;
+      const locationData = await loreContextManager.discoverLocation(campaignId, locationName);
+      return { 
+        success: locationData !== null, 
+        data: locationData || `Location "${locationName}" not found in world lore.`
+      };
+    }
+
+    case 'reveal_secret': {
+      const secretName = result.secretName as string;
+      const secretData = await loreContextManager.revealSecret(campaignId, secretName);
+      return { 
+        success: secretData !== null, 
+        data: secretData || `Secret "${secretName}" not found or already revealed.`
+      };
+    }
+
+    default:
+      return { success: false, data: `Unknown lore function: ${functionName}` };
+  }
 }

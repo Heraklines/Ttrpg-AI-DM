@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
 
         const characters: Character[] = campaign.characters.map((c) => ({
           id: c.id,
-          campaignId: c.campaignId,
+          campaignId: c.campaignId || '',
           name: c.name,
           race: c.race,
           className: c.className,

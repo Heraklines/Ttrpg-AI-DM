@@ -8,16 +8,17 @@ datasource db {
 }
 
 model Campaign {
-  id              String      @id @default(uuid())
+  id              String        @id @default(uuid())
   name            String
   description     String?
-  adventureModule String?     // JSON stored as string for SQLite
-  settings        String?     // JSON stored as string for SQLite
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
+  adventureModule String?       // JSON stored as string for SQLite
+  settings        String?       // JSON stored as string for SQLite
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
   characters      Character[]
   gameState       GameState?
   sessions        Session[]
+  lore            CampaignLore?
 }
 
 model Character {
@@ -153,4 +154,236 @@ model CampaignTemplate {
   description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+// ============================================================
+// CAMPAIGN LORE GENERATION SYSTEM
+// ============================================================
+
+model CampaignLore {
+  id                String   @id @default(uuid())
+  campaignId        String   @unique
+  campaign          Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  
+  // Generation status tracking
+  generationStatus  String   @default("pending") // pending, generating, completed, failed
+  generationPhase   String?  // current phase being generated
+  generationError   String?  // error message if failed
+  startedAt         DateTime?
+  completedAt       DateTime?
+  
+  // Core lore content (JSON stored as strings for SQLite)
+  worldName         String?
+  tone              String?  // dark, heroic, comedic, intrigue, epic, gritty, mysterious
+  themes            String   @default("[]")
+  cosmology         String   @default("{}")
+  worldHistory      String   @default("[]")
+  
+  // Relational data
+  npcs              LoreNpc[]
+  factions          LoreFaction[]
+  locations         LoreLocation[]
+  conflicts         LoreConflict[]
+  secrets           LoreSecret[]
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@index([generationStatus])
+}
+
+model LoreNpc {
+  id              String       @id @default(uuid())
+  campaignLoreId  String
+  campaignLore    CampaignLore @relation(fields: [campaignLoreId], references: [id], onDelete: Cascade)
+  
+  name            String
+  role            String       // innkeeper, villain, mentor, quest_giver, merchant, guard, noble, etc.
+  importance      String       @default("minor") // major, supporting, minor
+  
+  // Personality
+  personality     String       @default("{}") // {traits: [], ideals: [], bonds: [], flaws: []}
+  speakingStyle   String?      // How they talk (formal, gruff, nervous, etc.)
+  quirks          String       @default("[]") // Memorable behaviors
+  
+  // Motivations
+  publicGoal      String?      // What they appear to want
+  secretGoal      String?      // What they actually want
+  fears           String       @default("[]")
+  
+  // Relationships
+  relationships   String       @default("[]") // Array of {npcId, relationship, description}
+  factionId       String?      // Primary faction affiliation
+  
+  // Location
+  primaryLocation String?      // Where they're usually found
+  
+  // Physical
+  race            String?
+  appearance      String?
+  
+  // Narrative state
+  isRevealed      Boolean      @default(false) // Has player met them?
+  playerRelation  String?      // friendly, neutral, hostile, unknown
+  
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  
+  @@index([campaignLoreId])
+  @@index([importance])
+  @@index([role])
+}
+
+model LoreFaction {
+  id              String       @id @default(uuid())
+  campaignLoreId  String
+  campaignLore    CampaignLore @relation(fields: [campaignLoreId], references: [id], onDelete: Cascade)
+  
+  name            String
+  type            String       // guild, religion, government, criminal, military, merchant, academic, secret_society
+  importance      String       @default("minor") // major, supporting, minor
+  
+  // Identity
+  publicImage     String?      // How they present themselves
+  secretNature    String?      // What they really are
+  symbol          String?      // Visual identifier
+  motto           String?
+  
+  // Goals & Methods
+  goals           String       @default("[]") // Array of objectives
+  methods         String       @default("[]") // How they achieve goals
+  resources       String       @default("[]") // Money, soldiers, magic, etc.
+  
+  // Relationships
+  allies          String       @default("[]") // Array of faction names
+  enemies         String       @default("[]") // Array of faction names
+  
+  // Territory
+  headquarters    String?      // Primary location
+  territory       String       @default("[]") // Array of location names
+  influence       Int          @default(5) // 1-10 scale of power
+  
+  // Narrative state
+  playerStanding  String?      // friendly, neutral, hostile, unknown
+  
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  
+  @@index([campaignLoreId])
+  @@index([type])
+}
+
+model LoreLocation {
+  id              String       @id @default(uuid())
+  campaignLoreId  String
+  campaignLore    CampaignLore @relation(fields: [campaignLoreId], references: [id], onDelete: Cascade)
+  
+  name            String
+  locationType    String       // city, town, village, dungeon, wilderness, landmark, ruins, fortress
+  importance      String       @default("minor") // major, supporting, minor
+  
+  // Description
+  description     String?      // General description
+  atmosphere      String?      // Mood/feel of the place
+  sensoryDetails  String       @default("{}") // {sights, sounds, smells}
+  
+  // Geography
+  region          String?      // Broader area it belongs to
+  terrain         String?      // Mountains, forest, coastal, etc.
+  climate         String?
+  connectedTo     String       @default("[]") // Array of {locationName, direction, travelTime}
+  
+  // Significance
+  historicalNote  String?      // Historical importance
+  currentEvents   String       @default("[]") // What's happening now
+  
+  // Population
+  population      String?      // Size/composition
+  notableNpcs     String       @default("[]") // Array of NPC names present here
+  factionPresence String       @default("[]") // Array of {factionName, influence}
+  
+  // Secrets
+  hiddenSecrets   String       @default("[]") // Array of secret names
+  
+  // Narrative state
+  isDiscovered    Boolean      @default(false) // Has player been here?
+  
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  
+  @@index([campaignLoreId])
+  @@index([locationType])
+  @@index([region])
+}
+
+model LoreConflict {
+  id              String       @id @default(uuid())
+  campaignLoreId  String
+  campaignLore    CampaignLore @relation(fields: [campaignLoreId], references: [id], onDelete: Cascade)
+  
+  name            String
+  type            String       // war, political, personal, ideological, economic, supernatural
+  scope           String       @default("regional") // local, regional, world
+  importance      String       @default("supporting") // major (campaign-defining), supporting, minor
+  
+  // Parties
+  participants    String       @default("[]") // Array of {type: 'faction'|'npc', name, role: 'aggressor'|'defender'|'neutral'}
+  
+  // Stakes
+  stakes          String?      // What's at risk
+  publicKnowledge String?      // What people generally know
+  trueNature      String?      // The reality of the situation
+  
+  // State
+  currentState    String       @default("brewing") // brewing, active, climax, resolved
+  recentEvents    String       @default("[]") // Recent developments
+  
+  // Resolution
+  possibleOutcomes String      @default("[]") // Array of potential resolutions
+  playerInfluence  String?     // How players might affect this
+  
+  // Narrative state
+  isRevealed      Boolean      @default(false) // Are players aware?
+  playerStance    String?      // which side (if any) players have taken
+  
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  
+  @@index([campaignLoreId])
+  @@index([type])
+  @@index([currentState])
+}
+
+model LoreSecret {
+  id              String       @id @default(uuid())
+  campaignLoreId  String
+  campaignLore    CampaignLore @relation(fields: [campaignLoreId], references: [id], onDelete: Cascade)
+  
+  name            String       // Internal reference name
+  type            String       // plot_twist, hidden_identity, forbidden_knowledge, treasure, betrayal
+  importance      String       @default("supporting") // major, supporting, minor
+  
+  // Content
+  content         String       // The actual secret
+  hints           String       @default("[]") // Array of clues that point to this
+  
+  // Connections
+  relatedNpcs     String       @default("[]") // NPC names who know or are affected
+  relatedFactions String       @default("[]") // Faction names involved
+  relatedLocations String      @default("[]") // Location names where evidence might be found
+  
+  // Discovery
+  discoveryConditions String   @default("[]") // What triggers reveal
+  revealImpact    String?      // What happens when revealed
+  
+  // State
+  isRevealed      Boolean      @default(false)
+  partiallyKnown  String       @default("[]") // Which hints have been discovered
+  
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  
+  @@index([campaignLoreId])
+  @@index([type])
+  @@index([isRevealed])
 }

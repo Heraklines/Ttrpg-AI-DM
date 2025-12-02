@@ -9,7 +9,7 @@
  */
 
 import { generateContent } from './client';
-import { executeFunction, stripFunctionCalls, parseFunctionCalls } from './function-executor';
+import { executeFunction, stripFunctionCalls, parseFunctionCalls, executeLoreFunction } from './function-executor';
 import { StateGuardian, ValidationResult } from './state-guardian';
 import { DM_SYSTEM_PROMPT_FULL } from './system-prompt';
 import type { Character, Combat } from '@/lib/engine/types';
@@ -75,6 +75,7 @@ export class AIOrchestrator {
     const executionContext = {
       characters: characterMap,
       combat: combatUpdate,
+      campaignId: context.campaignId,  // Add campaignId for lore functions
       updateCharacter: (id: string, updates: Partial<Character>) => {
         characterUpdates[id] = { ...characterUpdates[id], ...updates };
         // Also update in map for subsequent calls
@@ -91,8 +92,12 @@ export class AIOrchestrator {
       },
     };
 
-    // Generate context injection
-    const contextBlock = this.stateGuardian.generateContextInjection(context);
+    // Generate context injection (includes lore if available)
+    const loreContext = await this.stateGuardian.getLoreContext(context.campaignId);
+    const contextBlock = this.stateGuardian.generateContextInjection({
+      ...context,
+      loreContext
+    });
 
     // Build the full prompt
     const fullPrompt = `${contextBlock}
@@ -122,7 +127,24 @@ Execute the appropriate functions, then narrate the results naturally without me
 
         for (const call of functionCalls) {
           const result = executeFunction(call, executionContext);
-          functionResults.push({ name: result.name, displayText: result.displayText });
+          
+          // Handle async lore functions
+          if (result.success && result.result && typeof result.result === 'object' && 
+              (result.result as Record<string, unknown>).async === true) {
+            const loreResult = await executeLoreFunction(
+              call.name, 
+              result.result as Record<string, unknown>
+            );
+            // Update display text with actual lore data
+            functionResults.push({ 
+              name: result.name, 
+              displayText: loreResult.success 
+                ? `${result.displayText}\n${loreResult.data}`
+                : result.displayText
+            });
+          } else {
+            functionResults.push({ name: result.name, displayText: result.displayText });
+          }
         }
 
         // Clear the parsed calls

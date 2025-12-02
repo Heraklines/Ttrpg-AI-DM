@@ -341,6 +341,72 @@ export const lookupSpellFunction: FunctionDeclaration = {
   },
 };
 
+// Lore Functions
+export const recallLoreFunction: FunctionDeclaration = {
+  name: 'recall_lore',
+  description: 'Query world lore to recall information about NPCs, factions, locations, conflicts, or history. Use when players ask about the world or you need context.',
+  parameters: {
+    type: 'object',
+    properties: {
+      topic: {
+        type: 'string',
+        description: 'The topic to search for (name, place, faction, event, etc.)',
+      },
+      type: {
+        type: 'string',
+        description: 'Optional: narrow search to specific category',
+        enum: ['npc', 'faction', 'location', 'conflict', 'secret'],
+      },
+    },
+    required: ['topic'],
+  },
+};
+
+export const introduceNpcFunction: FunctionDeclaration = {
+  name: 'introduce_npc',
+  description: 'Introduce an NPC to the players. Call when players first meet an NPC to get their full details and mark them as known.',
+  parameters: {
+    type: 'object',
+    properties: {
+      npc_name: {
+        type: 'string',
+        description: 'Name of the NPC being introduced',
+      },
+    },
+    required: ['npc_name'],
+  },
+};
+
+export const discoverLocationFunction: FunctionDeclaration = {
+  name: 'discover_location',
+  description: 'Mark a location as discovered when players arrive at or learn about a new place.',
+  parameters: {
+    type: 'object',
+    properties: {
+      location_name: {
+        type: 'string',
+        description: 'Name of the location being discovered',
+      },
+    },
+    required: ['location_name'],
+  },
+};
+
+export const revealSecretFunction: FunctionDeclaration = {
+  name: 'reveal_secret',
+  description: 'Reveal a secret to the players. Use when players discover hidden information through investigation or events.',
+  parameters: {
+    type: 'object',
+    properties: {
+      secret_name: {
+        type: 'string',
+        description: 'Name/identifier of the secret being revealed',
+      },
+    },
+    required: ['secret_name'],
+  },
+};
+
 // All functions registry
 export const allFunctions: FunctionDeclaration[] = [
   rollDiceFunction,
@@ -358,6 +424,10 @@ export const allFunctions: FunctionDeclaration[] = [
   removeConditionFunction,
   lookupMonsterFunction,
   lookupSpellFunction,
+  recallLoreFunction,
+  introduceNpcFunction,
+  discoverLocationFunction,
+  revealSecretFunction,
 ];
 
 // Functions by category
@@ -366,3 +436,4 @@ export const hpFunctions = [applyDamageFunction, applyHealingFunction];
 export const combatFunctions = [startCombatFunction, nextTurnFunction, getCombatStatusFunction, endCombatFunction];
 export const conditionFunctions = [addConditionFunction, removeConditionFunction];
 export const referenceFunctions = [lookupMonsterFunction, lookupSpellFunction];
+export const loreFunctions = [recallLoreFunction, introduceNpcFunction, discoverLocationFunction, revealSecretFunction];
