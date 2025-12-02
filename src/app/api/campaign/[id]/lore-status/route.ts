@@ -10,52 +10,70 @@ export async function GET(
   try {
     const { id: campaignId } = await params;
 
+    // Check the generation queue first
     const job = await loreGenerationQueue.getStatus(campaignId);
 
-    if (!job) {
+    // Also check the WorldSeed directly for status
+    const worldSeed = await prisma.worldSeed.findUnique({
+      where: { campaignId },
+      include: {
+        _count: {
+          select: {
+            factions: true,
+            npcs: true,
+            locations: true,
+            conflicts: true,
+            secrets: true,
+          }
+        }
+      }
+    });
+
+    // If no job and no worldSeed, not started
+    if (!job && !worldSeed) {
       return NextResponse.json({
         status: 'not_started',
         message: 'Lore generation has not been initiated for this campaign'
       });
     }
 
-    // Get summary counts if completed
-    let summary = null;
-    if (job.status === 'completed') {
-      const lore = await prisma.campaignLore.findUnique({
-        where: { campaignId },
-        include: {
-          _count: {
-            select: {
-              npcs: true,
-              factions: true,
-              locations: true,
-              conflicts: true,
-              secrets: true
-            }
-          }
-        }
-      });
-
-      if (lore) {
-        summary = {
-          worldName: lore.worldName,
-          tone: lore.tone,
-          npcs: lore._count.npcs,
-          factions: lore._count.factions,
-          locations: lore._count.locations,
-          conflicts: lore._count.conflicts,
-          secrets: lore._count.secrets
-        };
+    // Determine status from worldSeed if available
+    let status = job?.status || 'not_started';
+    let phase = job?.phase || worldSeed?.currentPhase;
+    
+    if (worldSeed) {
+      if (worldSeed.generationStatus === 'completed') {
+        status = 'completed';
+      } else if (worldSeed.generationStatus === 'generating') {
+        status = 'generating';
+      } else if (worldSeed.generationStatus === 'failed') {
+        status = 'failed';
+      } else if (worldSeed.generationStatus === 'pending') {
+        status = 'pending';
       }
+      phase = worldSeed.currentPhase || phase;
+    }
+
+    // Build summary if completed
+    let summary = null;
+    if (status === 'completed' && worldSeed) {
+      summary = {
+        worldName: worldSeed.name,
+        tone: worldSeed.tone,
+        factions: worldSeed._count.factions,
+        npcs: worldSeed._count.npcs,
+        locations: worldSeed._count.locations,
+        conflicts: worldSeed._count.conflicts,
+        secrets: worldSeed._count.secrets,
+      };
     }
 
     return NextResponse.json({
-      status: job.status,
-      phase: job.phase,
-      error: job.error,
-      startedAt: job.startedAt,
-      completedAt: job.completedAt,
+      status,
+      phase,
+      error: worldSeed?.generationError || job?.error,
+      startedAt: job?.startedAt,
+      completedAt: job?.completedAt,
       summary
     });
 

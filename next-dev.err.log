@@ -320,3 +320,35 @@ Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\pagef
 Watchpack Error (initial scan): Error: EINVAL: invalid argument, lstat 'C:\swapfile.sys'
 <w> [webpack.cache.PackFileCacheStrategy] Caching failed for pack: Error: ENOENT: no such file or directory, rename 'C:\Users\micha\Dnd_App\.next\cache\webpack\client-development-fallback\0.pack.gz_' -> 'C:\Users\micha\Dnd_App\.next\cache\webpack\client-development-fallback\0.pack.gz'
  ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⨯ PrismaClientKnownRequestError: 
+Invalid `prisma.campaign.findUnique()` invocation:
+
+
+The table `main.WorldSeed` does not exist in the current database.
+    at async LorePage (./src/app/campaign/[id]/lore/page.tsx:17:22)
+digest: "434715033"
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\swapfile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\swapfile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\swapfile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\swapfile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
