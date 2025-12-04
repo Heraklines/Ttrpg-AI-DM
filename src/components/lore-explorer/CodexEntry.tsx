@@ -242,11 +242,11 @@ function CosmologyContent({
           </div>
         )}
 
-        {tensionStance.tensionName && (
+        {Boolean(tensionStance.tensionName) && (
           <div className="border border-primary-gold/30 rounded p-3 bg-background-dark/40 text-sm">
             <div className="text-primary-gold">Tension Stance</div>
             <div className="mt-1">
-              {tensionStance.tensionName}: {tensionStance.side} — {tensionStance.reason}
+              {tensionStance.tensionName as string}: {tensionStance.side as string} — {tensionStance.reason as string}
             </div>
           </div>
         )}
@@ -266,10 +266,10 @@ function CosmologyContent({
       {Object.keys(magicSystem).length > 0 && (
         <div className="space-y-2">
           <div className="text-primary-gold text-sm uppercase tracking-wide">Magic System</div>
-          {magicSystem.source && <div><span className="text-primary-gold">Source:</span> {magicSystem.source as string}</div>}
-          {magicSystem.rules && <div><span className="text-primary-gold">Rules:</span> {magicSystem.rules as string}</div>}
-          {magicSystem.limitations && <div><span className="text-primary-gold">Limits:</span> {magicSystem.limitations as string}</div>}
-          {magicSystem.tensionRelevance && (
+          {Boolean(magicSystem.source) && <div><span className="text-primary-gold">Source:</span> {magicSystem.source as string}</div>}
+          {Boolean(magicSystem.rules) && <div><span className="text-primary-gold">Rules:</span> {magicSystem.rules as string}</div>}
+          {Boolean(magicSystem.limitations) && <div><span className="text-primary-gold">Limits:</span> {magicSystem.limitations as string}</div>}
+          {Boolean(magicSystem.tensionRelevance) && (
             <div className="italic text-sm text-parchment/70">{magicSystem.tensionRelevance as string}</div>
           )}
         </div>
@@ -278,7 +278,7 @@ function CosmologyContent({
       {Object.keys(planarStructure).length > 0 && (
         <div className="space-y-2">
           <div className="text-primary-gold text-sm uppercase tracking-wide">Planar Structure</div>
-          {planarStructure.description && <p>{planarStructure.description as string}</p>}
+          {Boolean(planarStructure.description) && <p>{planarStructure.description as string}</p>}
           {Array.isArray(planarStructure.relevantPlanes) && planarStructure.relevantPlanes.length > 0 && (
             <ul className="space-y-1 text-sm">
               {(planarStructure.relevantPlanes as Array<Record<string, string>>).map((plane, i) => (
@@ -311,7 +311,7 @@ function CosmologyContent({
             {prophecies.map((p: Record<string, unknown>, i: number) => (
               <li key={i} className="bg-background-dark/60 rounded p-3">
                 <div>{p.content as string}</div>
-                {p.relatedTension && (
+                {Boolean(p.relatedTension) && (
                   <div className="text-xs text-parchment/60 mt-1">Related to: {p.relatedTension as string}</div>
                 )}
               </li>
@@ -678,7 +678,7 @@ function ConflictContent({
         </div>
       )}
 
-      {isDmMode && entity.trueNature && entity.trueNature !== entity.publicNarrative && (
+      {isDmMode && Boolean(entity.trueNature) && entity.trueNature !== entity.publicNarrative && (
         <div className="border border-ember-red/30 rounded p-3 bg-ember-red/5">
           <span className="text-ember-red text-sm">🔒 True Nature (DM Only):</span>
           <p className="mt-1">{parseHyperlinks(entity.trueNature as string, onNavigate)}</p>
@@ -700,9 +700,9 @@ function ConflictContent({
               <div key={i} className="bg-background-dark rounded p-3">
                 <div className="font-semibold text-primary-gold">{side.name}</div>
                 {side.goals && <p className="text-sm mt-1">{side.goals}</p>}
-                {side.factions?.length > 0 && (
+                {(side.factions?.length ?? 0) > 0 && (
                   <div className="mt-2 flex flex-wrap gap-1">
-                    {side.factions.map((f, j) => (
+                    {side.factions!.map((f, j) => (
                       <button
                         key={j}
                         onClick={() => onNavigate('faction', f)}

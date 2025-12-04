@@ -620,12 +620,14 @@ export function executeFunction(call: FunctionCall, context: ExecutionContext): 
           });
         }
         
-        const classResources = character.classResources
-          .filter(r => r.rechargeOn === 'short_rest')
-          .map(r => ({ ...r, current: r.max }));
-        
-        if (classResources.length > 0) {
-          context.updateCharacter(character.id, { classResources: [...character.classResources] });
+        // Restore class resources that recharge on short rest
+        const hasShortRestResources = character.classResources.some(r => r.rechargeOn === 'short_rest');
+
+        if (hasShortRestResources) {
+          const restoredResources = character.classResources.map(r =>
+            r.rechargeOn === 'short_rest' ? { ...r, current: r.max } : r
+          );
+          context.updateCharacter(character.id, { classResources: restoredResources });
         }
         
         return {

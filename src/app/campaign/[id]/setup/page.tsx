@@ -3,30 +3,21 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-
-interface Character {
-  id: string;
-  name: string;
-  race: string;
-  className: string;
-  level: number;
-  currentHp: number;
-  maxHp: number;
-  backstory: string | null;
-  campaignId: string | null;
-}
+import { CharacterSetupSummary } from '@/lib/engine/types';
+import { GenerationDebugPanel } from '@/components/lore-explorer';
 
 interface Campaign {
   id: string;
   name: string;
   description: string | null;
-  characters: Character[];
+  characters: CharacterSetupSummary[];
 }
 
 interface LoreStatus {
   status: 'not_started' | 'pending' | 'generating' | 'completed' | 'failed';
   phase?: string;
   error?: string;
+  reason?: string; // Why generation hasn't started
   summary?: {
     worldName: string;
     tone: string;
@@ -37,6 +28,8 @@ interface LoreStatus {
     secrets: number;
   };
 }
+
+const MIN_DESCRIPTION_LENGTH = 50;
 
 const GENERATION_PHASES = [
   { id: 'tensions', label: 'Extracting Core Tensions', icon: '⚡' },
@@ -55,7 +48,7 @@ export default function CampaignSetupPage() {
   const campaignId = params.id as string;
 
   const [campaign, setCampaign] = useState<Campaign | null>(null);
-  const [allCharacters, setAllCharacters] = useState<Character[]>([]);
+  const [allCharacters, setAllCharacters] = useState<CharacterSetupSummary[]>([]);
   const [selectedCharacters, setSelectedCharacters] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -64,6 +57,15 @@ export default function CampaignSetupPage() {
   // Lore generation state
   const [loreStatus, setLoreStatus] = useState<LoreStatus>({ status: 'not_started' });
   const [lorePolling, setLorePolling] = useState(false);
+  
+  // World description editing state
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [editedDescription, setEditedDescription] = useState('');
+  const [savingDescription, setSavingDescription] = useState(false);
+  const [triggeringGeneration, setTriggeringGeneration] = useState(false);
+
+  // Debug panel state
+  const [showDebugPanel, setShowDebugPanel] = useState(false);
 
   // Load campaign and character data
   const loadData = useCallback(async () => {
@@ -74,7 +76,7 @@ export default function CampaignSetupPage() {
       setCampaign(campaignData.campaign);
 
       const existingIds = new Set<string>(
-        (campaignData.campaign.characters || []).map((c: Character) => c.id)
+        (campaignData.campaign.characters || []).map((c: CharacterSetupSummary) => c.id)
       );
       setSelectedCharacters(existingIds);
 
@@ -109,6 +111,77 @@ export default function CampaignSetupPage() {
       console.error('Failed to poll lore status:', err);
     }
   }, [campaignId]);
+
+  // Save world description
+  const saveDescription = async () => {
+    if (!campaign) return;
+    
+    setSavingDescription(true);
+    setError(null);
+    
+    try {
+      const res = await fetch(`/api/campaign/${campaignId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ description: editedDescription }),
+      });
+      
+      if (!res.ok) {
+        throw new Error('Failed to save description');
+      }
+      
+      const data = await res.json();
+      setCampaign({ ...campaign, description: editedDescription });
+      setIsEditingDescription(false);
+      
+      // If description is now long enough, offer to start generation
+      if (editedDescription.trim().length >= MIN_DESCRIPTION_LENGTH && loreStatus.status === 'not_started') {
+        // Refresh lore status to see if we can now generate
+        await pollLoreStatus();
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to save description');
+    } finally {
+      setSavingDescription(false);
+    }
+  };
+
+  // Manually trigger lore generation
+  const triggerGeneration = async () => {
+    setTriggeringGeneration(true);
+    setError(null);
+    
+    try {
+      const res = await fetch(`/api/campaign/${campaignId}/generate-lore`, {
+        method: 'POST',
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to start generation');
+      }
+      
+      setLoreStatus({ status: 'pending' });
+      setLorePolling(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to start generation');
+    } finally {
+      setTriggeringGeneration(false);
+    }
+  };
+
+  // Start editing description
+  const startEditingDescription = () => {
+    setEditedDescription(campaign?.description || '');
+    setIsEditingDescription(true);
+  };
+
+  // Cancel editing
+  const cancelEditingDescription = () => {
+    setIsEditingDescription(false);
+    setEditedDescription('');
+  };
 
   useEffect(() => {
     loadData();
@@ -227,16 +300,149 @@ export default function CampaignSetupPage() {
             WORLD GENERATION PROGRESS
             ═══════════════════════════════════════════════════════════════════ */}
         <section className="bg-[#1a1a1a] rounded-lg p-6 border border-amber-900/30 mb-6">
-          <h2 className="font-bold text-xl text-amber-400 mb-4 flex items-center gap-2">
-            <span>🌍</span> World Generation
-          </h2>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="font-bold text-xl text-amber-400 flex items-center gap-2">
+              <span>🌍</span> World Generation
+            </h2>
+            <button
+              onClick={() => setShowDebugPanel(true)}
+              className="px-3 py-1.5 text-xs bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-gray-300 rounded border border-gray-700"
+            >
+              🔧 Debug Panel
+            </button>
+          </div>
 
-          {loreStatus.status === 'not_started' && (
-            <div className="text-center py-6">
-              <div className="text-gray-500 mb-2">No world description provided</div>
-              <p className="text-gray-600 text-sm">
-                Add a campaign description to auto-generate rich world lore
-              </p>
+          {/* World Description Editor - Always shown when not generating */}
+          {!isGenerating && loreStatus.status !== 'completed' && (
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-gray-400 font-semibold text-sm">
+                  World Description
+                </label>
+                {!isEditingDescription && campaign?.description && (
+                  <button
+                    onClick={startEditingDescription}
+                    className="text-xs text-amber-400 hover:text-amber-300"
+                  >
+                    ✏️ Edit
+                  </button>
+                )}
+              </div>
+              
+              {isEditingDescription ? (
+                <div className="space-y-3">
+                  <textarea
+                    value={editedDescription}
+                    onChange={(e) => setEditedDescription(e.target.value)}
+                    placeholder="Describe your world in detail... What is the setting? What conflicts exist? What makes this world unique? The more detail you provide, the richer the generated lore will be."
+                    className="w-full h-40 px-4 py-3 bg-[#0d0d0d] border border-amber-700/30 rounded-lg text-gray-300 placeholder-gray-600 focus:outline-none focus:border-amber-600 resize-none"
+                  />
+                  <div className="flex items-center justify-between">
+                    <div className={`text-sm ${
+                      editedDescription.trim().length >= MIN_DESCRIPTION_LENGTH 
+                        ? 'text-green-400' 
+                        : 'text-amber-400'
+                    }`}>
+                      {editedDescription.trim().length} / {MIN_DESCRIPTION_LENGTH} characters
+                      {editedDescription.trim().length < MIN_DESCRIPTION_LENGTH && (
+                        <span className="text-gray-500 ml-2">
+                          ({MIN_DESCRIPTION_LENGTH - editedDescription.trim().length} more needed for world generation)
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={cancelEditingDescription}
+                        className="px-3 py-1.5 text-gray-400 hover:text-gray-300 text-sm"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={saveDescription}
+                        disabled={savingDescription}
+                        className="px-4 py-1.5 bg-amber-700 text-white rounded hover:bg-amber-600 disabled:opacity-50 text-sm"
+                      >
+                        {savingDescription ? 'Saving...' : 'Save Description'}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : campaign?.description ? (
+                <div className="bg-[#0d0d0d] rounded-lg p-4 border border-gray-800">
+                  <div className="scroll-container-sm">
+                    <p className="text-gray-400 italic whitespace-pre-wrap pr-2">{campaign.description}</p>
+                  </div>
+                  <div className="mt-2 text-xs text-gray-600">
+                    {campaign.description.trim().length} characters
+                  </div>
+                </div>
+              ) : (
+                <button
+                  onClick={startEditingDescription}
+                  className="w-full py-8 border-2 border-dashed border-amber-700/30 rounded-lg text-center text-amber-400 hover:bg-amber-900/10 transition-colors"
+                >
+                  <div className="text-2xl mb-2">📝</div>
+                  <div>Click to add a world description</div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    At least {MIN_DESCRIPTION_LENGTH} characters required for world generation
+                  </div>
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Status: Not Started - Show why and how to start */}
+          {loreStatus.status === 'not_started' && !isEditingDescription && (
+            <div className="text-center py-4">
+              {campaign?.description && campaign.description.trim().length >= MIN_DESCRIPTION_LENGTH ? (
+                // Description is sufficient but generation hasn't started
+                <div className="space-y-4">
+                  <div className="text-green-400 flex items-center justify-center gap-2">
+                    <span>✓</span>
+                    <span>World description ready for generation</span>
+                  </div>
+                  <button
+                    onClick={triggerGeneration}
+                    disabled={triggeringGeneration}
+                    className="px-6 py-3 bg-gradient-to-r from-amber-600 to-amber-500 text-white font-semibold rounded-lg hover:from-amber-500 hover:to-amber-400 transition-all disabled:opacity-50 shadow-lg shadow-amber-900/30"
+                  >
+                    {triggeringGeneration ? (
+                      <span className="flex items-center gap-2">
+                        <span className="animate-spin">⏳</span> Starting...
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-2">
+                        <span>✨</span> Generate World Lore
+                      </span>
+                    )}
+                  </button>
+                  <p className="text-xs text-gray-500">
+                    This will create factions, NPCs, locations, conflicts, and secrets based on your description
+                  </p>
+                </div>
+              ) : campaign?.description ? (
+                // Description exists but is too short
+                <div className="space-y-3">
+                  <div className="text-amber-400 flex items-center justify-center gap-2">
+                    <span>⚠️</span>
+                    <span>Description too short for world generation</span>
+                  </div>
+                  <p className="text-gray-500 text-sm">
+                    Add at least {MIN_DESCRIPTION_LENGTH - (campaign.description?.trim().length || 0)} more characters to enable automatic world building
+                  </p>
+                  <button
+                    onClick={startEditingDescription}
+                    className="px-4 py-2 border border-amber-700/50 text-amber-400 rounded hover:bg-amber-900/20"
+                  >
+                    Expand Description
+                  </button>
+                </div>
+              ) : (
+                // No description at all
+                <div className="text-gray-500">
+                  <p>Add a world description above to generate rich lore</p>
+                </div>
+              )}
             </div>
           )}
 
@@ -458,6 +664,13 @@ export default function CampaignSetupPage() {
           </div>
         )}
       </div>
+
+      {/* Debug Panel */}
+      <GenerationDebugPanel
+        campaignId={campaignId}
+        isOpen={showDebugPanel}
+        onClose={() => setShowDebugPanel(false)}
+      />
     </main>
   );
 }
@@ -494,7 +707,7 @@ function CharacterCard({
   onToggle,
   inCampaign,
 }: {
-  character: Character;
+  character: CharacterSetupSummary;
   selected: boolean;
   onToggle: () => void;
   inCampaign: boolean;

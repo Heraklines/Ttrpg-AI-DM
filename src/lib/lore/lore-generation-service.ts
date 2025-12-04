@@ -13,10 +13,104 @@ interface GenerationContext {
   coreTensions?: CoreTension[];
 }
 
+// Safe JSON parse helper to prevent crashes on corrupted data
+function safeJsonParse<T>(json: string | null | undefined, fallback: T): T {
+  if (!json) return fallback;
+  try {
+    return JSON.parse(json) as T;
+  } catch {
+    console.warn('Failed to parse JSON, using fallback:', json.slice(0, 100));
+    return fallback;
+  }
+}
+
 export class LoreGenerationService {
-  
+
+  // Debug logging helper - stores prompt/response for each phase
+  private async logPhaseStart(campaignId: string, phase: string, prompt: string): Promise<string> {
+    try {
+      const log = await prisma.loreGenerationLog.create({
+        data: {
+          campaignId,
+          phase,
+          status: 'started',
+          prompt,
+          createdAt: new Date(),
+        }
+      });
+      return log.id;
+    } catch (e) {
+      console.error('Failed to create debug log:', e);
+      return '';
+    }
+  }
+
+  private async logPhaseComplete(
+    logId: string,
+    response: string,
+    parsedData: Record<string, unknown> | null,
+    durationMs: number
+  ): Promise<void> {
+    if (!logId) return;
+    try {
+      await prisma.loreGenerationLog.update({
+        where: { id: logId },
+        data: {
+          status: 'completed',
+          response,
+          parsedData: parsedData ? JSON.stringify(parsedData) : null,
+          durationMs,
+          tokenCount: Math.ceil((response?.length || 0) / 4), // rough estimate
+        }
+      });
+    } catch (e) {
+      console.error('Failed to update debug log:', e);
+    }
+  }
+
+  private async logPhaseError(logId: string, error: string): Promise<void> {
+    if (!logId) return;
+    try {
+      await prisma.loreGenerationLog.update({
+        where: { id: logId },
+        data: {
+          status: 'failed',
+          error,
+        }
+      });
+    } catch (e) {
+      console.error('Failed to update debug log with error:', e);
+    }
+  }
+
+  // Helper to generate content with debug logging
+  private async generateWithLogging(
+    campaignId: string,
+    phase: string,
+    prompt: string
+  ): Promise<{ response: string; parsed: Record<string, unknown> }> {
+    const startTime = Date.now();
+    const logId = await this.logPhaseStart(campaignId, phase, prompt);
+
+    try {
+      const response = await generateContent(prompt);
+      const parsed = this.parseJsonFromResponse(response);
+      const durationMs = Date.now() - startTime;
+
+      await this.logPhaseComplete(logId, response, parsed, durationMs);
+
+      return { response, parsed };
+    } catch (error) {
+      await this.logPhaseError(logId, error instanceof Error ? error.message : 'Unknown error');
+      throw error;
+    }
+  }
+
   async generateLore(campaignId: string): Promise<{ success: boolean; error?: string }> {
     try {
+      // Note: Status is now tracked via WorldSeed.generationStatus and loreGenerationQueue
+      // The legacy CampaignLore table is synced at the end via syncToLegacyLore()
+
       const campaign = await prisma.campaign.findUnique({
         where: { id: campaignId },
         include: {
@@ -50,7 +144,7 @@ export class LoreGenerationService {
       });
       if (worldSeed) {
         context.worldSeedId = worldSeed.id;
-        context.coreTensions = JSON.parse(worldSeed.coreTensions || '[]');
+        context.coreTensions = safeJsonParse<CoreTension[]>(worldSeed.coreTensions, []);
       }
 
       await this.executePhase(campaignId, 'cosmology', () => 
@@ -128,7 +222,7 @@ export class LoreGenerationService {
 
     switch (phase) {
       case 'tensions':
-        const tensions = JSON.parse(worldSeed.coreTensions || '[]');
+        const tensions = safeJsonParse<CoreTension[]>(worldSeed.coreTensions, []);
         return tensions.length > 0;
       case 'cosmology':
         return worldSeed.cosmology !== null;
@@ -179,7 +273,7 @@ export class LoreGenerationService {
     });
     
     if (existing) {
-      const tensions = JSON.parse(existing.coreTensions || '[]');
+      const tensions = safeJsonParse<CoreTension[]>(existing.coreTensions, []);
       if (tensions.length > 0) return;
     }
     
@@ -192,7 +286,7 @@ export class LoreGenerationService {
     });
     if (!worldSeed) throw new Error('WorldSeed not found');
 
-    const tensions = JSON.parse(worldSeed.coreTensions || '[]') as CoreTension[];
+    const tensions = safeJsonParse<CoreTension[]>(worldSeed.coreTensions, []);
     const tensionText = this.formatTensionsForPrompt(tensions);
 
     const prompt = `Generate cosmology and world foundations for this world.
@@ -232,8 +326,7 @@ Generate in JSON format:
 
 IMPORTANT: Gods MUST take sides on the core tensions. The creation story MUST explain why these tensions exist.`;
 
-    const response = await generateContent(prompt);
-    const parsed = this.parseJsonFromResponse(response);
+    const { parsed } = await this.generateWithLogging(context.campaignId, 'cosmology', prompt);
 
     await prisma.worldCosmology.upsert({
       where: { worldSeedId: worldSeed.id },
@@ -266,7 +359,7 @@ IMPORTANT: Gods MUST take sides on the core tensions. The creation story MUST ex
     });
     if (!worldSeed) throw new Error('WorldSeed not found');
 
-    const tensions = JSON.parse(worldSeed.coreTensions || '[]') as CoreTension[];
+    const tensions = safeJsonParse<CoreTension[]>(worldSeed.coreTensions, []);
     const tensionText = this.formatTensionsForPrompt(tensions);
 
     const prompt = `Generate 5-8 factions for this world.
@@ -308,8 +401,7 @@ RULES:
 - Factions should have clear relationships with each other
 - Major factions should be on opposite sides of at least one tension`;
 
-    const response = await generateContent(prompt);
-    const parsed = this.parseJsonFromResponse(response);
+    const { parsed } = await this.generateWithLogging(context.campaignId, 'factions', prompt);
     const factions = parsed.factions as Array<Record<string, unknown>>;
 
     if (!factions || !Array.isArray(factions)) {
@@ -347,7 +439,7 @@ RULES:
     });
     if (!worldSeed) throw new Error('WorldSeed not found');
 
-    const tensions = JSON.parse(worldSeed.coreTensions || '[]') as CoreTension[];
+    const tensions = safeJsonParse<CoreTension[]>(worldSeed.coreTensions, []);
     const tensionText = this.formatTensionsForPrompt(tensions);
     const factionList = worldSeed.factions.map(f => `${f.name} (${f.type}, ${f.tier})`).join(', ');
 
@@ -402,8 +494,7 @@ RULES:
 - All NPCs should have tensionRole that ties them to the core conflicts
 - Leaders should personify their faction's tension stances`;
 
-    const response = await generateContent(prompt);
-    const parsed = this.parseJsonFromResponse(response);
+    const { parsed } = await this.generateWithLogging(context.campaignId, 'npcs', prompt);
     const npcs = parsed.npcs as Array<Record<string, unknown>>;
 
     if (!npcs || !Array.isArray(npcs)) {
@@ -455,7 +546,7 @@ RULES:
     });
     if (!worldSeed) throw new Error('WorldSeed not found');
 
-    const tensions = JSON.parse(worldSeed.coreTensions || '[]') as CoreTension[];
+    const tensions = safeJsonParse<CoreTension[]>(worldSeed.coreTensions, []);
     const tensionText = this.formatTensionsForPrompt(tensions);
     const factionList = worldSeed.factions.map(f => f.name).join(', ');
     const npcList = worldSeed.npcs.map(n => `${n.name} (${n.occupation})`).join(', ');
@@ -501,8 +592,7 @@ RULES:
 - Conflicts MUST involve existing factions and/or NPCs
 - At least one conflict should be brewing (not yet active)`;
 
-    const response = await generateContent(prompt);
-    const parsed = this.parseJsonFromResponse(response);
+    const { parsed } = await this.generateWithLogging(context.campaignId, 'conflicts', prompt);
     const conflicts = parsed.conflicts as Array<Record<string, unknown>>;
 
     if (!conflicts || !Array.isArray(conflicts)) {
@@ -542,7 +632,7 @@ RULES:
     });
     if (!worldSeed) throw new Error('WorldSeed not found');
 
-    const tensions = JSON.parse(worldSeed.coreTensions || '[]') as CoreTension[];
+    const tensions = safeJsonParse<CoreTension[]>(worldSeed.coreTensions, []);
     const tensionText = this.formatTensionsForPrompt(tensions);
     const factionList = worldSeed.factions.map(f => `${f.name} (influence: ${f.influence})`).join(', ');
     const conflictList = worldSeed.conflicts.map(c => c.name).join(', ');
@@ -590,8 +680,7 @@ RULES:
 - Locations tied to conflicts should reflect the tension
 - Create a logical geography (use type hierarchy: continent > nation > region > city)`;
 
-    const response = await generateContent(prompt);
-    const parsed = this.parseJsonFromResponse(response);
+    const { parsed } = await this.generateWithLogging(context.campaignId, 'locations', prompt);
     const locations = parsed.locations as Array<Record<string, unknown>>;
 
     if (!locations || !Array.isArray(locations)) {
@@ -644,7 +733,7 @@ RULES:
     });
     if (!worldSeed) throw new Error('WorldSeed not found');
 
-    const tensions = JSON.parse(worldSeed.coreTensions || '[]') as CoreTension[];
+    const tensions = safeJsonParse<CoreTension[]>(worldSeed.coreTensions, []);
     const tensionText = this.formatTensionsForPrompt(tensions);
 
     const prompt = `Generate 8-12 secrets for this world.
@@ -697,8 +786,7 @@ RULES:
 - Secrets MUST connect multiple entities (NPCs, factions, locations)
 - Each secret should have at least 2 hints scattered across the world`;
 
-    const response = await generateContent(prompt);
-    const parsed = this.parseJsonFromResponse(response);
+    const { parsed } = await this.generateWithLogging(context.campaignId, 'secrets', prompt);
     const secrets = parsed.secrets as Array<Record<string, unknown>>;
 
     if (!secrets || !Array.isArray(secrets)) {

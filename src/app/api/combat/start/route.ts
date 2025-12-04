@@ -67,7 +67,7 @@ export async function POST(request: NextRequest) {
       tempHp: c.tempHp,
       armorClass: c.armorClass,
       speed: c.speed,
-      hitDiceType: c.hitDiceType,
+      hitDiceType: c.hitDiceType as 6 | 8 | 10 | 12,
       hitDiceRemaining: c.hitDiceRemaining,
       deathSaveSuccesses: c.deathSaveSuccesses,
       deathSaveFailures: c.deathSaveFailures,

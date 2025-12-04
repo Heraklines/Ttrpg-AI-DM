@@ -2,16 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-
-interface Character {
-  id: string;
-  name: string;
-  race: string;
-  className: string;
-  level: number;
-  currentHp: number;
-  maxHp: number;
-}
+import { CharacterSummary } from '@/lib/engine/types';
 
 interface Campaign {
   id: string;
@@ -19,7 +10,7 @@ interface Campaign {
   description: string | null;
   createdAt: string;
   updatedAt: string;
-  characters: Character[];
+  characters: CharacterSummary[];
 }
 
 interface CampaignTemplate {
@@ -201,7 +192,7 @@ export default function CampaignsPage() {
             </button>
             <button
               onClick={() => setShowCreate(!showCreate)}
-              className="px-6 py-2 bg-primary text-background font-semibold rounded-lg hover:bg-primary-light transition-colors"
+              className="btn-ornate px-8 py-3 font-medieval font-bold tracking-wider"
             >
               {showCreate ? 'Cancel' : 'New Campaign'}
             </button>
@@ -252,7 +243,7 @@ export default function CampaignsPage() {
         {showCreate && (
           <form onSubmit={createCampaign} className="mb-8 p-6 bg-surface rounded-lg border border-primary/30">
             <h2 className="text-2xl font-medieval text-primary mb-4">Create New Campaign</h2>
-            
+
             {/* Template Selector */}
             {templates.length > 0 && (
               <div className="mb-4">
@@ -302,7 +293,7 @@ export default function CampaignsPage() {
                 rows={3}
               />
             </div>
-            
+
             {/* Save as Template Checkbox */}
             <div className="mb-4">
               <label className="flex items-center gap-2 cursor-pointer">
@@ -319,7 +310,7 @@ export default function CampaignsPage() {
             <button
               type="submit"
               disabled={creating || !newCampaignName.trim()}
-              className="px-6 py-2 bg-primary text-background font-semibold rounded-lg hover:bg-primary-light transition-colors disabled:opacity-50"
+              className="btn-ornate px-8 py-3 font-medieval font-bold tracking-wider disabled:opacity-50"
             >
               {creating ? 'Creating...' : 'Create Campaign'}
             </button>
@@ -342,7 +333,9 @@ export default function CampaignsPage() {
                   <div className="flex-1">
                     <h3 className="text-2xl font-medieval text-primary mb-2">{campaign.name}</h3>
                     {campaign.description && (
-                      <p className="text-parchment/70 mb-4 narrative-text">{campaign.description}</p>
+                      <div className="scroll-container-sm mb-4">
+                        <p className="text-parchment/70 narrative-text pr-2">{campaign.description}</p>
+                      </div>
                     )}
                     <div className="flex gap-4 text-sm text-parchment/50">
                       <span>{(campaign.characters || []).length} character(s)</span>
@@ -365,14 +358,14 @@ export default function CampaignsPage() {
                     {(campaign.characters || []).length > 0 ? (
                       <Link
                         href={`/campaign/${campaign.id}`}
-                        className="px-4 py-2 bg-primary text-background font-semibold rounded-lg hover:bg-primary-light transition-colors"
+                        className="btn-ornate px-6 py-3 font-medieval font-bold tracking-wider"
                       >
                         Continue
                       </Link>
                     ) : (
                       <Link
                         href={`/campaign/${campaign.id}/setup`}
-                        className="px-4 py-2 bg-primary text-background font-semibold rounded-lg hover:bg-primary-light transition-colors"
+                        className="btn-ornate px-6 py-3 font-medieval font-bold tracking-wider"
                       >
                         Setup Party
                       </Link>

@@ -4,5 +4,7 @@ export { CodexEntry } from './CodexEntry';
 export { MapView } from './MapView';
 export { RelationshipGraph } from './RelationshipGraph';
 export { LoreGenerationStatus } from './LoreGenerationStatus';
+export { TimelineView } from './TimelineView';
+export { GenerationDebugPanel } from './GenerationDebugPanel';
 
 export type { LoreCategory } from './NavigationSidebar';

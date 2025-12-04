@@ -3,62 +3,18 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
-
-interface Character {
-  id: string;
-  campaignId: string;
-  name: string;
-  race: string;
-  className: string;
-  subclass: string | null;
-  level: number;
-  background: string | null;
-  alignment: string | null;
-  strength: number;
-  dexterity: number;
-  constitution: number;
-  intelligence: number;
-  wisdom: number;
-  charisma: number;
-  maxHp: number;
-  currentHp: number;
-  tempHp: number;
-  armorClass: number;
-  speed: number;
-  hitDiceType: number;
-  hitDiceRemaining: number;
-  deathSaveSuccesses: number;
-  deathSaveFailures: number;
-  savingThrowProficiencies: string;
-  skillProficiencies: string;
-  skillExpertise: string;
-  spellSlots: string;
-  knownSpells: string;
-  preparedSpells: string;
-  spellcastingAbility: string | null;
-  classResources: string;
-  inventory: string;
-  equippedItems: string;
-  gold: number;
-  conditions: string;
-  features: string;
-  backstory: string | null;
-  notes: string | null;
-}
-
-function getModifier(score: number): number {
-  return Math.floor((score - 10) / 2);
-}
+import {
+  DBCharacter,
+  Ability,
+  getAbilityModifier,
+  getProficiencyBonus
+} from '@/lib/engine/types';
 
 function formatModifier(mod: number): string {
   return mod >= 0 ? `+${mod}` : `${mod}`;
 }
 
-function getProficiencyBonus(level: number): number {
-  return Math.ceil(level / 4) + 1;
-}
-
-const SKILLS: Record<string, { ability: keyof Character; name: string }> = {
+const SKILLS: Record<string, { ability: Ability; name: string }> = {
   acrobatics: { ability: 'dexterity', name: 'Acrobatics' },
   animal_handling: { ability: 'wisdom', name: 'Animal Handling' },
   arcana: { ability: 'intelligence', name: 'Arcana' },
@@ -83,13 +39,9 @@ export default function CharacterSheetPage() {
   const params = useParams();
   const characterId = params.id as string;
 
-  const [character, setCharacter] = useState<Character | null>(null);
+  const [character, setCharacter] = useState<DBCharacter | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetchCharacter();
-  }, [characterId, fetchCharacter]);
 
   const fetchCharacter = useCallback(async () => {
     try {
@@ -110,6 +62,10 @@ export default function CharacterSheetPage() {
       setLoading(false);
     }
   }, [characterId]);
+
+  useEffect(() => {
+    fetchCharacter();
+  }, [characterId, fetchCharacter]);
 
   if (loading) {
     return (
@@ -145,7 +101,7 @@ export default function CharacterSheetPage() {
   const hasSpellcasting = ['Bard', 'Cleric', 'Druid', 'Paladin', 'Ranger', 'Sorcerer', 'Warlock', 'Wizard'].includes(character.className);
   const hasClassResources = classResources.length > 0 || ['Barbarian', 'Bard', 'Monk', 'Sorcerer', 'Fighter', 'Warlock'].includes(character.className);
 
-  const abilities: Array<{ key: keyof Character; name: string; abbr: string }> = [
+  const abilities: Array<{ key: Ability; name: string; abbr: string }> = [
     { key: 'strength', name: 'Strength', abbr: 'STR' },
     { key: 'dexterity', name: 'Dexterity', abbr: 'DEX' },
     { key: 'constitution', name: 'Constitution', abbr: 'CON' },
@@ -236,7 +192,7 @@ export default function CharacterSheetPage() {
             <div className="grid grid-cols-2 gap-4">
               {abilities.map(({ key, name, abbr }) => {
                 const score = character[key] as number;
-                const mod = getModifier(score);
+                const mod = getAbilityModifier(score);
                 return (
                   <div key={key} className="text-center bg-background rounded-lg p-3">
                     <div className="text-xs text-parchment/60 mb-1">{abbr}</div>
@@ -254,7 +210,7 @@ export default function CharacterSheetPage() {
             <div className="space-y-2">
               {abilities.map(({ key, name, abbr }) => {
                 const score = character[key] as number;
-                const mod = getModifier(score);
+                const mod = getAbilityModifier(score);
                 const isProficient = savingThrowProfs.includes(key);
                 const total = mod + (isProficient ? profBonus : 0);
                 return (
@@ -277,7 +233,7 @@ export default function CharacterSheetPage() {
             <div className="space-y-1 text-sm max-h-80 overflow-y-auto">
               {Object.entries(SKILLS).map(([skillKey, { ability, name }]) => {
                 const score = character[ability] as number;
-                const mod = getModifier(score);
+                const mod = getAbilityModifier(score);
                 const isProficient = skillProfs.includes(skillKey);
                 const hasExpertise = skillExpertise.includes(skillKey);
                 let bonus = mod;
@@ -500,7 +456,9 @@ export default function CharacterSheetPage() {
         {character.backstory && (
           <div className="bg-surface rounded-lg p-6 border border-primary/20 mt-6">
             <h2 className="font-medieval text-xl text-primary mb-4">Backstory</h2>
-            <p className="text-parchment/80 narrative-text whitespace-pre-wrap">{character.backstory}</p>
+            <div className="scroll-container-md">
+              <p className="text-parchment/80 narrative-text whitespace-pre-wrap pr-2">{character.backstory}</p>
+            </div>
           </div>
         )}
       </div>

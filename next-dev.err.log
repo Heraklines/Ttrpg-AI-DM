@@ -352,3 +352,108 @@ Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys
 Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
 Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
 Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\hiberfil.sys'
+ ⨯ PrismaClientKnownRequestError: 
+Invalid `prisma.campaign.findUnique()` invocation:
+
+
+The table `main.WorldSeed` does not exist in the current database.
+    at async LorePage (./src/app/campaign/[id]/lore/page.tsx:17:22)
+digest: "434715033"
+ ⨯ ./src/app/campaign/[id]/setup/page.tsx
+Error: 
+  [31mx[0m Expected '}', got '<eof>'
+    ,-[[36;1;4mC:\Users\micha\Dnd_App\src\app\campaign\[id]\setup\page.tsx[0m:63:1]
+ [2m63[0m |   
+ [2m64[0m |   // Lore generation state
+ [2m65[0m |   const [loreStatus, setLoreStatus] = useState<LoreStatus>({ status: 'not_started' });
+ [2m66[0m |   const [lorePolling, setLorePolling] = useState(false);
+    : [31;1m                                                       ^[0m
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/campaign/[id]/setup/page.tsx
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+ ⨯ ./src/app/campaign/[id]/setup/page.tsx
+Error: 
+  [31mx[0m Expected '}', got '<eof>'
+    ,-[[36;1;4mC:\Users\micha\Dnd_App\src\app\campaign\[id]\setup\page.tsx[0m:63:1]
+ [2m63[0m |   
+ [2m64[0m |   // Lore generation state
+ [2m65[0m |   const [loreStatus, setLoreStatus] = useState<LoreStatus>({ status: 'not_started' });
+ [2m66[0m |   const [lorePolling, setLorePolling] = useState(false);
+    : [31;1m                                                       ^[0m
+    `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/campaign/[id]/setup/page.tsx
+ ⨯ ./src/app/campaign/[id]/setup/page.tsx
+Error: 
+  [31mx[0m Expected '}', got '<eof>'
+     ,-[[36;1;4mC:\Users\micha\Dnd_App\src\app\campaign\[id]\setup\page.tsx[0m:171:1]
+ [2m171[0m |     selectedCharacters.size > 0 && 
+ [2m172[0m |     (loreStatus.status === 'completed' || loreStatus.status === 'not_started');
+ [2m173[0m | 
+ [2m174[0m |   const isGenerating = loreStatus.status === 'generating' || loreStatus.status === 'pending';
+     : [31;1m                                                                                            ^[0m
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/campaign/[id]/setup/page.tsx
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⨯ ./src/app/campaign/[id]/setup/page.tsx
+Error: 
+  [31mx[0m Unexpected token `main`. Expected jsx identifier
+     ,-[[36;1;4mC:\Users\micha\Dnd_App\src\app\campaign\[id]\setup\page.tsx[0m:206:1]
+ [2m206[0m |   const availableCharacters = allCharacters.filter(c => c.campaignId !== campaignId);
+ [2m207[0m | 
+ [2m208[0m |   return (
+ [2m209[0m |     <main className="min-h-screen p-4 md:p-8 bg-[#0d0d0d]">
+     : [31;1m     ^^^^[0m
+ [2m210[0m |       <div className="max-w-4xl mx-auto">
+ [2m211[0m |         {/* Back Link */}
+ [2m212[0m |         <div className="mb-6">
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/app/campaign/[id]/setup/page.tsx
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⚠ Fast Refresh had to perform a full reload. Read more: https://nextjs.org/docs/messages/fast-refresh-reload
+ ⚠ Fast Refresh had to perform a full reload due to a runtime error.
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+Watchpack Error (stats): Error: EINVAL: invalid argument, lstat 'C:\pagefile.sys'
+^C

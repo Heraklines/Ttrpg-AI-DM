@@ -63,35 +63,51 @@
 - [x] apply_damage - Damage application
 - [x] apply_healing - Healing application
 
-#### Combat Functions
+#### Combat Functions ✅
 - [x] start_combat - Initialize combat
 - [x] next_turn - Advance turn
-- [ ] get_combat_status - Check combat state ❌ MISSING
+- [x] get_combat_status - Check combat state
 - [x] end_combat - End combat
 
-#### Condition Functions
+#### Condition Functions ✅
 - [x] add_condition - Apply conditions
 - [x] remove_condition - Remove conditions
 
-#### Character Functions
-- [ ] get_character - Get full character info ❌ MISSING IN EXECUTOR
-- [ ] modify_inventory - Item changes ❌ MISSING
-- [ ] use_resource - Spend class resources ❌ MISSING
+#### Character Functions ✅
+- [x] get_character - Get full character info
+- [x] modify_inventory - Item changes (add/remove/use/equip)
+- [x] use_resource - Spend class resources
 
-#### Reference Functions
-- [ ] lookup_monster - In function executor ❌ MISSING
-- [ ] lookup_spell - In function executor ❌ MISSING
-- [ ] lookup_condition - In function executor ❌ MISSING
+#### Reference Functions ✅
+- [x] lookup_monster - Monster stat lookup
+- [x] lookup_spell - Spell info lookup
+- [x] lookup_condition - Condition effects lookup
 
-#### Spatial Functions
-- [ ] set_position ❌ NOT IMPLEMENTED
-- [ ] get_distance ❌ NOT IMPLEMENTED
-- [ ] get_entities_in_area ❌ NOT IMPLEMENTED
+#### Spatial Functions ✅
+- [x] get_position - Get entity position
+- [x] move_entity - Move entity on map
+- [x] get_distance - Calculate distance between entities
+- [x] check_line_of_sight - LoS and cover calculation
+- [x] get_entities_in_range - Find nearby entities
+- [x] create_area_effect - Create AoE zones
+- [x] get_path - A* pathfinding
+- [x] reveal_area - Fog of war reveal
 
-#### Adventure State Functions
-- [ ] set_flag ❌ MISSING
-- [ ] check_flag ❌ MISSING
-- [ ] advance_time ❌ MISSING
+#### Adventure State Functions ✅
+- [x] set_flag - Set game state flag
+- [x] check_flag - Check game state flag
+- [x] advance_time - Advance game time
+- [x] set_location - Change party location
+
+#### Rest Functions ✅
+- [x] short_rest - Short rest with hit dice
+- [x] long_rest - Long rest recovery
+
+#### Lore Functions ✅
+- [x] recall_lore - Query world lore
+- [x] introduce_npc - Reveal NPC
+- [x] discover_location - Discover location
+- [x] reveal_secret - Reveal secret
 
 ---
 
@@ -101,27 +117,27 @@
 - [x] Combat status display
 - [x] Party status
 - [x] Initiative order
-- [ ] Function call log ❌ MISSING
+- [x] Function call log
 - [x] Reminders
 
-### 6.2 Validation Rules
+### 6.2 Validation Rules ✅
 - [x] ATTACK_WITHOUT_ROLL
 - [x] DAMAGE_WITHOUT_ROLL
 - [x] CHECK_WITHOUT_ROLL
 - [x] COMBAT_START_WITHOUT_INITIATIVE
 - [x] HEALING_WITHOUT_FUNCTION
 - [x] CONDITION_WITHOUT_FUNCTION
-- [ ] TURN_NOT_ADVANCED ❌ MISSING
-- [ ] DEATH_WITHOUT_PROCESSING ❌ MISSING
+- [x] TURN_NOT_ADVANCED
+- [x] DEATH_WITHOUT_PROCESSING
 
 ### 6.3 Validation Flow ✅
 - [x] Parse response
 - [x] Check rules
 - [x] Return validation result
 
-### 6.4 Correction Flow
-- [ ] Generate correction message ✅ (implemented but not used)
-- [ ] Retry loop ❌ NOT FULLY IMPLEMENTED
+### 6.4 Correction Flow ✅
+- [x] Generate correction message
+- [x] Retry loop for high severity issues
 
 ---
 
@@ -156,12 +172,12 @@
 - [x] Create new campaign
 - [x] Party preview
 
-#### Campaign Hub
-- [ ] Party overview with HP bars ⚠️ IN ADVENTURE SCREEN
+#### Campaign Hub ✅
+- [x] Party overview with HP bars (in adventure screen sidebar)
 - [x] Continue adventure
-- [ ] Manage characters link ❌ MISSING
-- [ ] Campaign settings link ❌ MISSING  
-- [ ] Session history link ❌ MISSING
+- [x] Setup page for party management
+- [x] Campaign settings link
+- [x] Session history link
 
 #### Adventure Screen ✅
 - [x] Top bar (title, location, time)
@@ -174,7 +190,7 @@
 #### Combat Overlay ✅
 - [x] Initiative order
 - [x] Combatant cards
-- [ ] Mini-map ❌ NOT IMPLEMENTED
+- [x] Mini-map (integrated into adventure screen right panel)
 - [x] Turn info
 
 #### Character Sheet ✅
@@ -183,8 +199,8 @@
 - [x] Combat stats
 - [x] Proficiencies
 - [x] Features
-- [ ] Spell slots display ⚠️ MISSING FOR CASTERS
-- [ ] Class resources ❌ MISSING
+- [x] Spell slots display
+- [x] Class resources with progress bars
 - [x] Inventory
 - [x] Backstory
 
@@ -194,7 +210,7 @@
 - [x] Class selection
 - [x] Ability score assignment (point buy)
 - [x] Proficiency selection
-- [ ] Equipment selection ❌ MISSING
+- [x] Equipment selection (class + background equipment)
 - [x] Backstory input
 
 #### Settings Page ✅
@@ -202,7 +218,15 @@
 - [x] Theme preferences
 - [x] Font size
 - [ ] Sound toggle ⚠️ EXISTS BUT NO SOUND SYSTEM
-- [ ] Delete campaign ❌ MISSING FROM SETTINGS
+- [x] Campaign deletion available
+
+#### World Lore Explorer ✅
+- [x] Codex view (searchable entries with categories)
+- [x] Map view (procedural terrain, markers, routes)
+- [x] Relationships graph (force-directed NPC/faction network)
+- [x] Timeline view (horizontal era/event display)
+- [x] Category filtering and search
+- [x] Entry detail expansion
 
 ### 8.3 Component Specifications
 - [x] Narrative display
@@ -225,14 +249,22 @@
 - [x] UserSettings
 - [x] MonsterCache
 - [x] SpellCache
+- [x] CampaignLore (legacy lore tracking)
+- [x] WorldSeed (new world generation system)
+- [x] WorldLocation
+- [x] WorldFaction
+- [x] WorldNPC
+- [x] WorldConflict
+- [x] WorldSecret
+- [x] WorldRelationship
 
 ---
 
 ## Section 10: API Endpoints
 
-### Adventure Endpoints
+### Adventure Endpoints ✅
 - [x] POST /api/adventure/action
-- [ ] GET /api/adventure/stream ❌ NOT IMPLEMENTED
+- [x] GET /api/adventure/action/stream (SSE streaming)
 - [x] POST /api/adventure/intro
 
 ### Campaign Endpoints
@@ -243,13 +275,18 @@
 - [x] DELETE /api/campaign/[id]
 - [ ] POST /api/campaign/[id]/import ❌ NOT IMPLEMENTED
 
-### Character Endpoints
+### Lore Endpoints ✅
+- [x] GET /api/campaign/[id]/lore (retrieve world lore data)
+- [x] GET /api/campaign/[id]/lore-status (check generation status)
+- [x] POST /api/campaign/[id]/lore (trigger lore generation)
+
+### Character Endpoints ✅
 - [x] GET /api/character?campaignId=X
 - [x] POST /api/character
 - [x] GET /api/character/[id]
 - [x] PUT /api/character/[id]
 - [x] DELETE /api/character/[id]
-- [ ] PUT /api/character/[id]/inventory ❌ MISSING
+- [x] PUT /api/character/[id]/inventory
 
 ### Combat Endpoints
 - [x] POST /api/combat/start
@@ -282,30 +319,52 @@
 ---
 
 ## Section 13: Testing
-- [x] Unit tests (72 passing)
-- [x] E2E tests (49 passing)
+- [x] Unit tests (115+ tests for dice/combat/spatial engines)
+- [x] E2E tests (Playwright test suite)
 - [ ] Full coverage ⚠️ PARTIAL
 
 ---
 
-## CRITICAL MISSING FEATURES
+## REMAINING WORK
 
-### HIGH PRIORITY
-1. ~~Function executor missing functions~~ ✅ IMPLEMENTED: get_combat_status, get_character, modify_inventory, use_resource, lookups, set_flag, check_flag, advance_time
-2. ~~Retry loop for AI validation~~ ✅ IMPLEMENTED: High severity issues trigger retry, low severity accepted with warnings
-3. ~~Character sheet spell slots and class resources~~ ✅ IMPLEMENTED: Full spell slot display, hit dice, death saves, class resources with progress bars
-4. ~~Equipment selection in character creation~~ ✅ IMPLEMENTED
-5. ~~Inventory management API~~ ✅ IMPLEMENTED: PUT /api/character/[id]/inventory
+### COMPLETED (Recent Sessions)
+1. ✅ World Lore Explorer UI - Codex + Map + Relationships + Timeline view
+2. ✅ RelationshipGraph component - Force-directed graph with faction/NPC connections
+3. ✅ Fixed lore generation trigger - Setup page now has description editor
+4. ✅ Added manual "Generate World Lore" button
+5. ✅ Improved lore-status API with detailed reason field
+6. ✅ MiniMap component integrated into adventure screen
+7. ✅ TimelineView component - Horizontal timeline with eras and events
+8. ✅ Enhanced MapView - Procedural terrain, compass rose, route visualization
+9. ✅ Fixed WorldConflict/WorldRelationship/WorldSecret schema mismatches
+10. ✅ Fixed Prisma relation syntax in test utilities
+11. ✅ Wired lore generation service to status updates properly
+12. ✅ Inventory system verified working (JSON serialization correct)
+13. ✅ Consolidated type definitions (DBCharacter, CharacterSummary, CharacterPartyView)
+14. ✅ Generation Debug Panel - View AI prompts/responses for each lore phase
+    - LoreGenerationLog database model for storing debug info
+    - Debug logging in lore-generation-service.ts for all 6 phases
+    - GenerationDebugPanel.tsx component with expandable phase logs
+    - /api/campaign/[id]/generation-logs endpoint
+    - Debug button on setup page World Generation section
 
 ### MEDIUM PRIORITY
-6. ~~Streaming responses (SSE)~~ ✅ IMPLEMENTED: /api/adventure/action/stream with status updates, dice events, chunked narrative
-7. ~~Mini-map/spatial system~~ ✅ IMPLEMENTED: Full spatial engine with A* pathfinding, LoS, cover, movement validation
-8. ~~Session history UI~~ ✅ IMPLEMENTED: /campaign/[id]/sessions with expandable transcripts
-9. ~~Campaign settings page~~ ✅ IMPLEMENTED: /campaign/[id]/settings with difficulty, death rules, rest rules, toggles
-10. Function call log in context injection (Already implemented in State Guardian)
+1. Sound system (toggle exists, no audio implementation)
+2. PDF adventure import endpoint
+3. Rate limiting for API routes
+4. Content safety filters
 
 ### LOW PRIORITY
-11. Sound system
-12. PDF adventure import
-13. Rate limiting
-14. Full responsive testing
+5. Full responsive testing
+6. Additional step-by-step few-shot examples in AI prompts
+7. Comprehensive error codes across all API routes
+
+### TEST STATUS ✅
+All 180 tests passing (7 test files):
+- Database models: 21 tests
+- API routes: 18 tests
+- Character templates: 11 tests
+- Combat engine: 39 tests
+- Spatial engine: 43 tests
+- Dice engine: 33 tests
+- Integration: 15 tests

@@ -184,7 +184,7 @@ export class TensionExtractor {
         themes: JSON.stringify(worldSeedData.themes),
         coreTensions: JSON.stringify(worldSeedData.coreTensions),
         creationMyth: worldSeedData.worldSketch || null,
-        generationStatus: 'tensions_extracted',
+        generationStatus: 'generating',
         currentPhase: 'tensions',
       },
       update: {
@@ -194,7 +194,7 @@ export class TensionExtractor {
         themes: JSON.stringify(worldSeedData.themes),
         coreTensions: JSON.stringify(worldSeedData.coreTensions),
         creationMyth: worldSeedData.worldSketch || null,
-        generationStatus: 'tensions_extracted',
+        generationStatus: 'generating',
         currentPhase: 'tensions',
         updatedAt: new Date(),
       },

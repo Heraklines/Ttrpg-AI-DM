@@ -26,10 +26,16 @@ export default async function LorePage({ params }: { params: { id: string } }) {
 
   const worldSeed = campaign.worldSeed;
   if (!worldSeed || worldSeed.generationStatus !== 'completed') {
+    const validStatuses = ['pending', 'generating', 'completed', 'failed', 'not_started'] as const;
+    type LoreStatus = typeof validStatuses[number];
+    const status = (validStatuses.includes(worldSeed?.generationStatus as LoreStatus) 
+      ? worldSeed?.generationStatus 
+      : 'pending') as LoreStatus;
+    
     return (
       <LoreGenerationStatus
         campaignId={params.id}
-        initialStatus={worldSeed?.generationStatus || 'pending'}
+        initialStatus={status}
         initialPhase={worldSeed?.currentPhase || null}
         initialError={worldSeed?.generationError || null}
       />
@@ -50,8 +56,8 @@ export default async function LorePage({ params }: { params: { id: string } }) {
       <div className="h-screen pt-16">
         <LoreExplorer
           campaignId={params.id}
-          worldSeedId={campaign.worldSeed.id}
-          worldName={campaign.worldSeed.name || campaign.name}
+          worldSeedId={worldSeed.id}
+          worldName={worldSeed.name || campaign.name}
           initialMode="dm"
         />
       </div>

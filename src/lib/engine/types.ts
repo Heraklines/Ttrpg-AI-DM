@@ -358,6 +358,94 @@ export interface FunctionResult {
   error?: string;
 }
 
+// Database/API Character type (as returned by Prisma - flat ability scores, JSON strings)
+// Use this type for components that receive data directly from API/database
+export interface DBCharacter {
+  id: string;
+  campaignId: string | null;
+  name: string;
+  race: string;
+  className: string;
+  subclass: string | null;
+  level: number;
+  background: string | null;
+  alignment: string | null;
+  // Flat ability scores (not nested)
+  strength: number;
+  dexterity: number;
+  constitution: number;
+  intelligence: number;
+  wisdom: number;
+  charisma: number;
+  // Combat stats
+  maxHp: number;
+  currentHp: number;
+  tempHp: number;
+  armorClass: number;
+  speed: number;
+  hitDiceType: number;
+  hitDiceRemaining: number;
+  deathSaveSuccesses: number;
+  deathSaveFailures: number;
+  // JSON string fields (parse before use)
+  savingThrowProficiencies: string;
+  skillProficiencies: string;
+  skillExpertise: string;
+  spellSlots: string;
+  knownSpells: string;
+  preparedSpells: string;
+  spellcastingAbility: string | null;
+  classResources: string;
+  inventory: string;
+  equippedItems: string;
+  conditions: string;
+  features: string;
+  // Simple fields
+  gold: number;
+  backstory: string | null;
+  notes: string | null;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+}
+
+// Minimal character type for list views (campaign list, party preview)
+export interface CharacterSummary {
+  id: string;
+  name: string;
+  race: string;
+  className: string;
+  level: number;
+  currentHp: number;
+  maxHp: number;
+}
+
+// Extended summary for setup pages (includes backstory for preview)
+export interface CharacterSetupSummary extends CharacterSummary {
+  backstory: string | null;
+  campaignId: string | null;
+}
+
+// Character data for adventure/party view (includes combat stats and resources)
+export interface CharacterPartyView extends CharacterSummary {
+  tempHp: number;
+  armorClass: number;
+  speed: number;
+  strength: number;
+  dexterity: number;
+  constitution: number;
+  intelligence: number;
+  wisdom: number;
+  charisma: number;
+  conditions: string;
+  inventory: string;
+  gold: number;
+  spellSlots: string;
+  classResources: string;
+  knownSpells: string;
+  preparedSpells: string;
+  equippedItems: string;
+}
+
 // Helper functions
 export function getAbilityModifier(score: number): number {
   return Math.floor((score - 10) / 2);

@@ -5,33 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { MiniMap } from '@/components/mini-map';
 import type { GameMap, GridPosition, MapEntity } from '@/lib/engine/spatial-types';
-
-interface Character {
-  id: string;
-  name: string;
-  race: string;
-  className: string;
-  level: number;
-  currentHp: number;
-  maxHp: number;
-  tempHp: number;
-  armorClass: number;
-  speed: number;
-  strength: number;
-  dexterity: number;
-  constitution: number;
-  intelligence: number;
-  wisdom: number;
-  charisma: number;
-  conditions: string;
-  inventory: string;
-  gold: number;
-  spellSlots: string;
-  classResources: string;
-  knownSpells: string;
-  preparedSpells: string;
-  equippedItems: string;
-}
+import { CharacterPartyView } from '@/lib/engine/types';
 
 interface GameState {
   mode: string;
@@ -47,7 +21,7 @@ interface Campaign {
   id: string;
   name: string;
   description: string | null;
-  characters: Character[];
+  characters: CharacterPartyView[];
   gameState: GameState;
 }
 
@@ -78,6 +52,17 @@ type LoreStatus =
     }
   | null;
 
+// Safe JSON parse helper to prevent crashes on corrupted data
+function safeJsonParse<T>(json: string | null | undefined, fallback: T): T {
+  if (!json) return fallback;
+  try {
+    return JSON.parse(json) as T;
+  } catch {
+    console.warn('Failed to parse JSON in campaign page');
+    return fallback;
+  }
+}
+
 export default function AdventurePage() {
   const params = useParams();
   const router = useRouter();
@@ -92,6 +77,9 @@ export default function AdventurePage() {
   const [loreStatus, setLoreStatus] = useState<LoreStatus>(null);
   const [hideLoreBanner, setHideLoreBanner] = useState(false);
   const [showLoreToast, setShowLoreToast] = useState(false);
+  const [streamingEnabled, setStreamingEnabled] = useState(true);
+  const [streamingStatus, setStreamingStatus] = useState<string | null>(null);
+  const [streamingText, setStreamingText] = useState<string>('');
   
   // UI State
   const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
@@ -241,67 +229,192 @@ export default function AdventurePage() {
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setSending(true);
+    setStreamingText('');
+    setStreamingStatus(null);
 
-    try {
-      const res = await fetch('/api/adventure/action', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          campaignId,
-          playerInput: userMessage.content,
-        }),
-      });
-
-      const data = await res.json();
-
-      if (data.error) {
-        throw new Error(data.error.message);
-      }
-
-      const newRolls: DiceRoll[] = (data.diceRolls || []).map((roll: { name?: string; displayText?: string }) => ({
-        type: roll.name || 'roll',
-        notation: roll.displayText?.match(/\d+d\d+[+-]?\d*/)?.[0] || '',
-        result: parseInt(roll.displayText?.match(/= (\d+)/)?.[1] || '0'),
-        details: roll.displayText || '',
-        success: roll.displayText?.includes('SUCCESS') ? true : roll.displayText?.includes('FAIL') ? false : undefined,
-        timestamp: Date.now(),
-      }));
-      
-      if (newRolls.length > 0) {
-        setDiceHistory(prev => [...newRolls, ...prev].slice(0, 50));
-      }
-
-      const assistantMessage: Message = {
-        id: `assistant-${Date.now()}`,
-        role: 'assistant',
-        content: data.narrative,
-        timestamp: Date.now(),
-        diceRolls: newRolls,
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
-
-      if (data.gameState) {
-        setCampaign((prev) => prev ? {
-          ...prev,
-          gameState: { ...prev.gameState, ...data.gameState },
-        } : prev);
-      }
-
-      const refreshRes = await fetch(`/api/campaign/${campaignId}`);
-      if (refreshRes.ok) {
-        const refreshData = await refreshRes.json();
-        setCampaign(refreshData.campaign);
-      }
-    } catch (err) {
+    // Add placeholder message for streaming
+    const assistantMessageId = `assistant-${Date.now()}`;
+    
+    if (streamingEnabled) {
+      // Streaming mode
       setMessages((prev) => [...prev, {
-        id: `error-${Date.now()}`,
-        role: 'system',
-        content: `Error: ${err instanceof Error ? err.message : 'Something went wrong'}`,
+        id: assistantMessageId,
+        role: 'assistant',
+        content: '',
         timestamp: Date.now(),
       }]);
-    } finally {
-      setSending(false);
+
+      try {
+        const response = await fetch('/api/adventure/action/stream', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            campaignId,
+            playerInput: userMessage.content,
+          }),
+        });
+
+        if (!response.ok || !response.body) {
+          throw new Error('Failed to start streaming');
+        }
+
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let accumulatedText = '';
+        let newRolls: DiceRoll[] = [];
+        let currentEventType: string | null = null;
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || '';
+
+          // Proper SSE parsing - track event type across lines
+          for (const line of lines) {
+            if (line.startsWith('event: ')) {
+              currentEventType = line.slice(7).trim();
+            } else if (line.startsWith('data: ') && currentEventType) {
+              try {
+                const data = JSON.parse(line.slice(6));
+
+                switch (currentEventType) {
+                  case 'status':
+                    setStreamingStatus(data.message);
+                    break;
+                  case 'dice':
+                    newRolls = (data || []).map((roll: { name?: string; displayText?: string }) => ({
+                      type: roll.name || 'roll',
+                      notation: roll.displayText?.match(/\d+d\d+[+-]?\d*/)?.[0] || '',
+                      result: parseInt(roll.displayText?.match(/= (\d+)/)?.[1] || '0'),
+                      details: roll.displayText || '',
+                      success: roll.displayText?.includes('SUCCESS') ? true : roll.displayText?.includes('FAIL') ? false : undefined,
+                      timestamp: Date.now(),
+                    }));
+                    if (newRolls.length > 0) {
+                      setDiceHistory(prev => [...newRolls, ...prev].slice(0, 50));
+                    }
+                    break;
+                  case 'chunk':
+                    accumulatedText += data.text;
+                    setStreamingText(accumulatedText);
+                    setMessages((prev) => prev.map(m =>
+                      m.id === assistantMessageId
+                        ? { ...m, content: accumulatedText }
+                        : m
+                    ));
+                    break;
+                  case 'complete':
+                    setMessages((prev) => prev.map(m =>
+                      m.id === assistantMessageId
+                        ? { ...m, content: data.narrative, diceRolls: newRolls }
+                        : m
+                    ));
+                    if (data.gameState) {
+                      setCampaign((prev) => prev ? {
+                        ...prev,
+                        gameState: { ...prev.gameState, ...data.gameState },
+                      } : prev);
+                    }
+                    break;
+                  case 'error':
+                    throw new Error(data.message);
+                }
+                currentEventType = null; // Reset after processing
+              } catch (parseError) {
+                // Ignore parse errors for incomplete data
+              }
+            } else if (line === '') {
+              // Empty line marks end of event, reset
+              currentEventType = null;
+            }
+          }
+        }
+
+        // Refresh campaign data
+        const refreshRes = await fetch(`/api/campaign/${campaignId}`);
+        if (refreshRes.ok) {
+          const refreshData = await refreshRes.json();
+          setCampaign(refreshData.campaign);
+        }
+      } catch (err) {
+        setMessages((prev) => prev.filter(m => m.id !== assistantMessageId).concat({
+          id: `error-${Date.now()}`,
+          role: 'system',
+          content: `Error: ${err instanceof Error ? err.message : 'Something went wrong'}`,
+          timestamp: Date.now(),
+        }));
+      } finally {
+        setSending(false);
+        setStreamingStatus(null);
+        setStreamingText('');
+      }
+    } else {
+      // Non-streaming mode (original behavior)
+      try {
+        const res = await fetch('/api/adventure/action', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            campaignId,
+            playerInput: userMessage.content,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (data.error) {
+          throw new Error(data.error.message);
+        }
+
+        const newRolls: DiceRoll[] = (data.diceRolls || []).map((roll: { name?: string; displayText?: string }) => ({
+          type: roll.name || 'roll',
+          notation: roll.displayText?.match(/\d+d\d+[+-]?\d*/)?.[0] || '',
+          result: parseInt(roll.displayText?.match(/= (\d+)/)?.[1] || '0'),
+          details: roll.displayText || '',
+          success: roll.displayText?.includes('SUCCESS') ? true : roll.displayText?.includes('FAIL') ? false : undefined,
+          timestamp: Date.now(),
+        }));
+        
+        if (newRolls.length > 0) {
+          setDiceHistory(prev => [...newRolls, ...prev].slice(0, 50));
+        }
+
+        const assistantMessage: Message = {
+          id: assistantMessageId,
+          role: 'assistant',
+          content: data.narrative,
+          timestamp: Date.now(),
+          diceRolls: newRolls,
+        };
+
+        setMessages((prev) => [...prev, assistantMessage]);
+
+        if (data.gameState) {
+          setCampaign((prev) => prev ? {
+            ...prev,
+            gameState: { ...prev.gameState, ...data.gameState },
+          } : prev);
+        }
+
+        const refreshRes = await fetch(`/api/campaign/${campaignId}`);
+        if (refreshRes.ok) {
+          const refreshData = await refreshRes.json();
+          setCampaign(refreshData.campaign);
+        }
+      } catch (err) {
+        setMessages((prev) => [...prev, {
+          id: `error-${Date.now()}`,
+          role: 'system',
+          content: `Error: ${err instanceof Error ? err.message : 'Something went wrong'}`,
+          timestamp: Date.now(),
+        }]);
+      } finally {
+        setSending(false);
+      }
     }
   }
 
@@ -489,7 +602,7 @@ export default function AdventurePage() {
             {campaign.characters.map((char) => {
               const hpPercent = getHpPercent(char.currentHp, char.maxHp);
               const isSelected = char.id === selectedCharacterId;
-              const conditions = char.conditions ? JSON.parse(char.conditions) : [];
+              const conditions = safeJsonParse<Array<{ condition: string }>>(char.conditions, []);
               
               return (
                 <button
@@ -630,7 +743,7 @@ export default function AdventurePage() {
               </div>
             ))}
             
-            {sending && (
+            {sending && !streamingEnabled && (
               <div className="flex justify-start">
                 <div className="bg-[#1a1a1a] border border-gray-800 rounded-lg p-4">
                   <div className="flex items-center gap-2 text-gray-500">
@@ -678,6 +791,18 @@ export default function AdventurePage() {
                 className="flex-1 px-4 py-2.5 bg-[#0d0d0d] border border-gray-700 rounded-lg text-gray-200 placeholder-gray-600 focus:outline-none focus:border-amber-700 disabled:opacity-50"
               />
               <button
+                type="button"
+                onClick={() => setStreamingEnabled(!streamingEnabled)}
+                className={`px-3 py-2.5 rounded-lg transition-colors ${
+                  streamingEnabled 
+                    ? 'bg-green-900/30 text-green-400 border border-green-800/50' 
+                    : 'bg-gray-800 text-gray-500 border border-gray-700'
+                }`}
+                title={streamingEnabled ? 'Streaming enabled (click to disable)' : 'Streaming disabled (click to enable)'}
+              >
+                ⚡
+              </button>
+              <button
                 type="submit"
                 disabled={sending || !input.trim()}
                 className="px-5 py-2.5 bg-amber-700 text-white font-medium rounded-lg hover:bg-amber-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
@@ -685,6 +810,13 @@ export default function AdventurePage() {
                 Send
               </button>
             </form>
+            {/* Streaming Status */}
+            {streamingStatus && (
+              <div className="mt-2 text-xs text-gray-500 flex items-center gap-2">
+                <span className="animate-pulse">●</span>
+                {streamingStatus}
+              </div>
+            )}
           </div>
         </div>
 
@@ -730,7 +862,7 @@ export default function AdventurePage() {
                 <div className="p-3 border-b border-gray-800 bg-slate-900/50">
                   <div className="text-xs text-gray-500 mb-2">Equipped</div>
                   {(() => {
-                    const equipped = selectedChar.equippedItems ? JSON.parse(selectedChar.equippedItems) : {};
+                    const equipped = safeJsonParse<Record<string, string>>(selectedChar.equippedItems, {});
                     const slots = [
                       { key: 'mainHand', label: 'Main Hand', icon: '⚔️' },
                       { key: 'offHand', label: 'Off Hand', icon: '🛡️' },
@@ -769,7 +901,7 @@ export default function AdventurePage() {
                 {/* Items */}
                 <div className="flex-1 overflow-y-auto p-2">
                   {(() => {
-                    const inventory = selectedChar.inventory ? JSON.parse(selectedChar.inventory) : [];
+                    const inventory = safeJsonParse<Array<{ name: string; quantity: number }>>(selectedChar.inventory, []);
                     if (inventory.length === 0) {
                       return <p className="text-gray-600 text-sm text-center py-4">No items</p>;
                     }
@@ -844,7 +976,7 @@ export default function AdventurePage() {
                 <div className="p-3 border-b border-gray-800">
                   <div className="text-xs text-gray-500 mb-2">Spell Slots</div>
                   {(() => {
-                    const slots = selectedChar.spellSlots ? JSON.parse(selectedChar.spellSlots) : {};
+                    const slots = safeJsonParse<Record<number, { current: number; max: number }>>(selectedChar.spellSlots, {});
                     const slotLevels = Object.keys(slots).map(Number).sort((a, b) => a - b);
                     
                     if (slotLevels.length === 0) {
@@ -881,8 +1013,8 @@ export default function AdventurePage() {
                 {/* Known/Prepared Spells */}
                 <div className="flex-1 overflow-y-auto p-2">
                   {(() => {
-                    const knownSpells: string[] = selectedChar.knownSpells ? JSON.parse(selectedChar.knownSpells) : [];
-                    const preparedSpells: string[] = selectedChar.preparedSpells ? JSON.parse(selectedChar.preparedSpells) : [];
+                    const knownSpells = safeJsonParse<string[]>(selectedChar.knownSpells, []);
+                    const preparedSpells = safeJsonParse<string[]>(selectedChar.preparedSpells, []);
                     const allSpells = Array.from(new Set([...preparedSpells, ...knownSpells]));
                     
                     if (allSpells.length === 0) {

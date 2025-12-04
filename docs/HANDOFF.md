@@ -185,61 +185,82 @@ Parsed by regex in `function-executor.ts` → `parseFunctionCalls()`
 - [x] Campaign settings
 - [x] Adventure screen with party sidebar
 - [x] Collapsible dice log
+- [x] World Lore Generation System (WorldSeed + related models)
+- [x] Lore Explorer UI with Codex view
+- [x] MiniMap component (canvas-based, drag-to-move)
+- [x] All game functions implemented in function-executor.ts
 
 ---
 
-## What Needs Work / Known Issues
+## Current Status
 
-### HIGH PRIORITY - NEXT FEATURE
+### IMPLEMENTED
+1. **World Lore Generation** - Full pipeline with WorldSeed, tensions extraction, 6-phase generation
+2. **Lore Explorer UI** - `/campaign/[id]/lore` page with codex navigation, map view with locations, relationship graph
+3. **All AI Functions** - roll_*, apply_*, combat_*, lore_*, spatial_* all implemented
+4. **MiniMap Component** - Canvas rendering with fog of war, entities, drag movement - integrated into adventure screen right panel
+5. **Streaming** - `/api/adventure/action/stream` integrated with toggle button and status indicator
+6. **Spell System UI** - Right panel shows spell slots, known/prepared spells, click-to-cast
 
-1. **Campaign World Lore Generation System** (DESIGN COMPLETE - READY FOR IMPLEMENTATION)
-   - Full specification in `/.kiro/specs/campaign-lore-generation/design.md`
-   - When player finishes campaign description, auto-generate:
-     - World history, cosmology, tone, themes
-     - Factions (5-8) with goals, methods, relationships
-     - NPCs (10-15) with personalities, motivations, secrets
-     - Conflicts (4-6) with stakes, participants, resolutions
-     - Locations (10-15) with descriptions, connections, atmosphere
-     - Secrets (8-12) with hints, discovery conditions, impact
-   - Stored in campaign-specific database (CampaignLore 1:1 with Campaign)
-   - Context injection with tiered relevance scoring
-   - New AI functions: `recall_lore`, `reveal_secret`, `introduce_npc`, `discover_location`
+### COMPLETED (This Session)
+- Fixed all build errors (type casting issues in lore page, character page, CodexEntry)
+- Fixed all test failures (vitest parallelism, schema field mismatches)
+- Integrated MapView into LoreExplorer with tabs (Codex/Map/Graph)
+- Added streaming support to adventure sendMessage function
+- Fixed property-based test date generation issue
 
-### EXISTING ISSUES
+### COMPLETED (World Lore Fixes)
+- **Fixed lore generation not triggering from templates**: Added world description editor to setup page
+- **Added 50-character minimum indicator**: Character counter shows progress to minimum required
+- **Added manual "Generate World Lore" button**: Visible when description is sufficient
+- **Improved lore-status API**: Returns detailed `reason` field (`no_description`, `description_too_short`, `ready`)
+- **Integrated RelationshipGraph component**: Relationships tab now shows faction/NPC connections with force-directed layout
+- **Added description editing**: Users can edit/expand campaign description after creation
+- Setup page now shows exactly why generation hasn't started and what to do
 
-2. **Inventory Display Bug** - Items may not show correctly in adventure screen. Check:
-   - Is `character.inventory` being parsed correctly? (It's stored as JSON string)
-   - Is the API returning updated inventory after `modify_inventory`?
-   - Test: Create character → Check inventory tab → Should see class + background items
+### COMPLETED (New Lore Visualizations)
+- **TimelineView component**: Horizontal timeline displaying world eras and major events
+  - Era bars showing time spans with color-coded tones
+  - Event markers at correct positions with hover tooltips
+  - Zoom controls (50% to 200%) for exploring dense timelines
+  - Player/DM mode filtering (DM-only events hidden for players)
+  - Click-to-navigate to event details in codex
+  - File: `src/components/lore-explorer/TimelineView.tsx`
+- **Enhanced MapView component**: Interactive world map with advanced features
+  - Procedural terrain generation (mountains, forests, water, plains)
+  - SVG compass rose with cardinal/intercardinal directions
+  - Route visualization between connected locations
+  - Layer toggles (terrain/routes/labels)
+  - Zoom (25% to 200%) and pan controls
+  - Info cards on location hover
+  - File: `src/components/lore-explorer/MapView.tsx`
+- **LoreExplorer integration**: Added timeline tab button and view section
+  - Four tabs: Codex, World Map, Relationships, Timeline
+  - Timeline data fetched from history endpoint
+  - Smooth tab switching between all views
 
-3. **AI Sometimes Doesn't Narrate** - The orchestrator has a fallback (line ~142 in `orchestrator.ts`) but it may need tuning
+### KNOWN ISSUES
 
-4. **Location Inference** - `inferCurrentLocation()` in state-guardian is basic. Will be enhanced by Lore System with:
-   - Explicit `currentLocation` tracking in GameState
-   - AI calls `set_location()` function when party moves
-   - Location lore provides rich context
+1. **Test file TypeScript errors** - `src/__tests__/api-routes.test.ts` has NextRequest type mismatches (18 errors)
+   - Tests use `Request` but API expects `NextRequest`
+   - Doesn't affect runtime, only test execution
+   - Fix: Create proper NextRequest mocks or update test utilities
 
-### MEDIUM PRIORITY
+2. **AI Sometimes Doesn't Narrate** - The orchestrator has a fallback but may need tuning
 
-5. **MiniMap Component** - `components/mini-map.tsx` exists but not integrated into adventure screen. Needs:
-   - Canvas rendering
-   - Entity positions
-   - Click-to-move interaction
+3. **Location Inference** - `inferCurrentLocation()` in state-guardian is basic. Enhanced by:
+   - `set_location()` function in function-executor
+   - Location lore provides rich context when available
 
-6. **Spell System** - Basic slots exist but no spell lookup/casting flow. Files exist:
-   - `/api/rules/spells` - Fetches from D&D 5e API
-   - Need UI for spell selection and AI integration
+### REMAINING FEATURES (Nice-to-have)
 
-7. **Equipment/Armor** - No equipped items UI. Data structure exists (`equippedItems` in Character)
+1. **Equipment/Armor UI** - Data structure exists (`equippedItems` in Character) - already shows in inventory panel
 
-8. **Long Rest / Short Rest** - Hit dice recovery partially implemented
+2. **Sound System** - Not implemented (optional)
 
-### LOW PRIORITY
+3. **PDF Import** - Not implemented (optional)
 
-9. **Streaming** - `/api/adventure/action/stream` exists but not used in UI
-10. **Sound System** - Not implemented
-11. **PDF Import** - Not implemented
-12. **Rate Limiting** - No API protection
+4. **Rate Limiting** - No API protection (production concern)
 
 ---
 

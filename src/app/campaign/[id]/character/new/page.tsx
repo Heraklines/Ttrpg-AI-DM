@@ -1,8 +1,25 @@
 'use client';
 
-import { useState, useRef } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useState, useRef, useEffect } from 'react';
+import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
+
+// Quiz result type for pre-filling
+interface QuizResultData {
+  suggestedRace: string;
+  suggestedClass: string;
+  suggestedBackground: string;
+  alignment: string;
+  backstory: string | null;
+  suggestedAbilities: {
+    strength: number;
+    dexterity: number;
+    constitution: number;
+    intelligence: number;
+    wisdom: number;
+    charisma: number;
+  };
+}
 
 const RACES = ['Human', 'Elf', 'Dwarf', 'Halfling', 'Dragonborn', 'Gnome', 'Half-Elf', 'Half-Orc', 'Tiefling'];
 const CLASSES = ['Barbarian', 'Bard', 'Cleric', 'Druid', 'Fighter', 'Monk', 'Paladin', 'Ranger', 'Rogue', 'Sorcerer', 'Warlock', 'Wizard'];
@@ -146,28 +163,32 @@ function combineEquipment(
   backgroundEquipment: Array<{ name: string; quantity: number }>
 ): Array<{ name: string; quantity: number }> {
   const combined = new Map<string, number>();
-  
+
   for (const item of classEquipment) {
     combined.set(item.name, (combined.get(item.name) || 0) + item.quantity);
   }
-  
+
   for (const item of backgroundEquipment) {
     combined.set(item.name, (combined.get(item.name) || 0) + item.quantity);
   }
-  
+
   return Array.from(combined.entries()).map(([name, quantity]) => ({ name, quantity }));
 }
 
 export default function CharacterCreationWizard() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const campaignId = params.id as string;
+  const fromQuizResultId = searchParams.get('fromQuiz');
 
   const [step, setStep] = useState<Step>('basics');
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  
+  const [fromQuizResult, setFromQuizResult] = useState<QuizResultData | null>(null);
+  const [loadingQuizResult, setLoadingQuizResult] = useState(!!fromQuizResultId);
+
   // Ref to prevent double-click submissions (synchronous check)
   const isSubmitting = useRef(false);
 
@@ -186,6 +207,52 @@ export default function CharacterCreationWizard() {
 
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [backstory, setBackstory] = useState('');
+
+  // Fetch quiz result and pre-fill form when accessed via ?fromQuiz=resultId
+  useEffect(() => {
+    if (!fromQuizResultId) return;
+
+    async function fetchQuizResult() {
+      try {
+        const res = await fetch(`/api/quiz/result/${fromQuizResultId}`);
+        if (!res.ok) throw new Error('Failed to fetch quiz result');
+
+        const data = await res.json();
+        if (data.result) {
+          const result = data.result as QuizResultData;
+          setFromQuizResult(result);
+
+          // Pre-fill form fields
+          setRace(result.suggestedRace);
+          setClassName(result.suggestedClass);
+          setBackground(result.suggestedBackground);
+          setAlignment(result.alignment);
+
+          // Pre-fill abilities if suggested
+          if (result.suggestedAbilities) {
+            setAbilities(result.suggestedAbilities);
+            // Recalculate points remaining
+            const totalCost = Object.values(result.suggestedAbilities).reduce(
+              (sum, score) => sum + (score <= 13 ? score - 8 : score === 14 ? 7 : score === 15 ? 9 : 0),
+              0
+            );
+            setPointsRemaining(27 - totalCost);
+          }
+
+          // Pre-fill backstory if available
+          if (result.backstory) {
+            setBackstory(result.backstory);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch quiz result:', err);
+      } finally {
+        setLoadingQuizResult(false);
+      }
+    }
+
+    fetchQuizResult();
+  }, [fromQuizResultId]);
 
   const hitDice = CLASS_HIT_DICE[className] || 8;
   const conMod = Math.floor((abilities.constitution - 10) / 2);
@@ -227,7 +294,7 @@ export default function CharacterCreationWizard() {
     // Prevent double submission - check ref synchronously before any async operations
     if (isSubmitting.current || saving) return;
     isSubmitting.current = true;
-    
+
     if (!name.trim()) {
       setError('Please enter a character name');
       isSubmitting.current = false;
@@ -310,18 +377,42 @@ export default function CharacterCreationWizard() {
         </Link>
 
         <h1 className="text-3xl font-medieval text-primary mt-6 mb-2">Create Character</h1>
-        <p className="text-parchment/60 mb-8">Forge your hero for this adventure</p>
+        <p className="text-parchment/60 mb-6">Forge your hero for this adventure</p>
+
+        {/* Soul Mirror CTA */}
+        <Link href={`/campaign/${campaignId}/character/quiz`}>
+          <button className="w-full mb-6 py-4 px-6 btn-soul-mirror rounded-xl text-center group">
+            <span className="relative z-10 flex items-center justify-center gap-3">
+              <span className="text-2xl animate-sparkle">🔮</span>
+              <span>
+                <span className="block text-xl font-medieval text-primary shimmer-text">
+                  ✨ Discover Your Character
+                </span>
+                <span className="block text-sm text-parchment/60 group-hover:text-parchment/80 transition-colors">
+                  Take a personality quiz to reveal your destined hero
+                </span>
+              </span>
+              <span className="text-2xl animate-sparkle" style={{ animationDelay: '1s' }}>🔮</span>
+            </span>
+          </button>
+        </Link>
+
+        {/* Divider */}
+        <div className="flex items-center gap-4 mb-8">
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+          <span className="text-parchment/40 text-sm">or create manually</span>
+          <div className="flex-1 h-px bg-gradient-to-r from-transparent via-primary/30 to-transparent" />
+        </div>
 
         {/* Progress Steps */}
         <div className="flex justify-between mb-8">
           {steps.map((s, i) => (
             <div key={s.key} className="flex items-center">
               <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                  i <= currentStepIndex
-                    ? 'bg-primary text-background'
-                    : 'bg-surface text-parchment/40'
-                }`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${i <= currentStepIndex
+                  ? 'bg-primary text-background'
+                  : 'bg-surface text-parchment/40'
+                  }`}
               >
                 {i + 1}
               </div>
@@ -523,11 +614,10 @@ export default function CharacterCreationWizard() {
                   <button
                     key={skill}
                     onClick={() => toggleSkill(skill)}
-                    className={`px-3 py-2 rounded-lg text-left text-sm transition-colors ${
-                      selectedSkills.includes(skill)
-                        ? 'bg-primary text-background'
-                        : 'bg-background text-parchment/70 hover:bg-primary/10'
-                    }`}
+                    className={`px-3 py-2 rounded-lg text-left text-sm transition-colors ${selectedSkills.includes(skill)
+                      ? 'bg-primary text-background'
+                      : 'bg-background text-parchment/70 hover:bg-primary/10'
+                      }`}
                   >
                     {skill.replace('_', ' ').replace(/\b\w/g, (c) => c.toUpperCase())}
                   </button>

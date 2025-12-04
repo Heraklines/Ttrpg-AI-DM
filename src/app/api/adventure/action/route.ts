@@ -160,14 +160,14 @@ export async function POST(request: NextRequest) {
       gameStateUpdate.mode = modeChange;
     }
 
-    // Check for location changes from function results
+    // Check for location changes from function results - use structured result data
     const locationChange = result.functionResults.find(
-      (r) => r.name === 'set_location' && typeof r.displayText === 'string'
+      (r) => r.name === 'set_location'
     );
-    if (locationChange) {
-      const locationMatch = locationChange.displayText.match(/Location changed: (.+) \((\w+)\)/);
-      if (locationMatch) {
-        gameStateUpdate.currentLocationId = locationMatch[1];
+    if (locationChange && typeof locationChange.result === 'object' && locationChange.result !== null) {
+      const locResult = locationChange.result as { locationName?: string };
+      if (locResult.locationName) {
+        gameStateUpdate.currentLocationId = locResult.locationName;
       }
     }
 

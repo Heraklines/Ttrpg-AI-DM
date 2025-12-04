@@ -34,7 +34,7 @@ export interface OrchestratorContext {
 
 export interface OrchestratorResult {
   narrative: string;
-  functionResults: Array<{ name: string; displayText: string }>;
+  functionResults: Array<{ name: string; displayText: string; result?: unknown }>;
   stateUpdates: {
     characterUpdates: Record<string, Partial<Character>>;
     combatUpdate: Combat | null;
@@ -57,7 +57,7 @@ export class AIOrchestrator {
     playerInput: string,
     context: OrchestratorContext
   ): Promise<OrchestratorResult> {
-    const functionResults: Array<{ name: string; displayText: string }> = [];
+    const functionResults: Array<{ name: string; displayText: string; result?: unknown }> = [];
     const characterUpdates: Record<string, Partial<Character>> = {};
     let combatUpdate: Combat | null = context.gameState.activeCombat;
     let modeChange: string | null = null;
@@ -129,21 +129,22 @@ Execute the appropriate functions, then narrate the results naturally without me
           const result = executeFunction(call, executionContext);
           
           // Handle async lore functions
-          if (result.success && result.result && typeof result.result === 'object' && 
+          if (result.success && result.result && typeof result.result === 'object' &&
               (result.result as Record<string, unknown>).async === true) {
             const loreResult = await executeLoreFunction(
-              call.name, 
+              call.name,
               result.result as Record<string, unknown>
             );
             // Update display text with actual lore data
-            functionResults.push({ 
-              name: result.name, 
-              displayText: loreResult.success 
+            functionResults.push({
+              name: result.name,
+              displayText: loreResult.success
                 ? `${result.displayText}\n${loreResult.data}`
-                : result.displayText
+                : result.displayText,
+              result: result.result
             });
           } else {
-            functionResults.push({ name: result.name, displayText: result.displayText });
+            functionResults.push({ name: result.name, displayText: result.displayText, result: result.result });
           }
         }
 

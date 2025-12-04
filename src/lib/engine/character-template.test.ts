@@ -451,8 +451,8 @@ describe('Campaign Template UI Properties', () => {
             id: fc.uuid(),
             name: fc.string({ minLength: 1, maxLength: 100 }).filter(s => s.trim().length > 0),
             description: fc.option(fc.string({ maxLength: 500 }), { nil: null }),
-            createdAt: fc.date({ min: new Date('2020-01-01'), max: new Date('2030-12-31') }).map(d => d.toISOString()),
-            updatedAt: fc.date({ min: new Date('2020-01-01'), max: new Date('2030-12-31') }).map(d => d.toISOString()),
+            createdAt: fc.integer({ min: Date.UTC(2020, 0, 1), max: Date.UTC(2030, 11, 31) }).map(ts => new Date(ts).toISOString()),
+            updatedAt: fc.integer({ min: Date.UTC(2020, 0, 1), max: Date.UTC(2030, 11, 31) }).map(ts => new Date(ts).toISOString()),
           }),
           { minLength: 0, maxLength: 20 }
         ),

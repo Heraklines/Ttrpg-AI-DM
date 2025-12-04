@@ -20,6 +20,8 @@ model Campaign {
   sessions        Session[]
   lore            CampaignLore?
   worldSeed       WorldSeed?
+  generationLogs  LoreGenerationLog[]
+  quizSessions    QuizSession[]
 }
 
 model Character {
@@ -698,3 +700,116 @@ model LoreSecret {
   @@index([isRevealed])
   @@index([tier])
 }
+
+// ============================================================
+// LORE GENERATION DEBUG LOG
+// ============================================================
+
+model LoreGenerationLog {
+  id          String   @id @default(uuid())
+  campaignId  String
+  campaign    Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  phase       String   // tensions, cosmology, factions, npcs, conflicts, locations, secrets, coherence
+  status      String   @default("started") // started, completed, failed
+
+  prompt      String?  // The prompt sent to AI (can be large)
+  response    String?  // The AI response (can be large)
+  parsedData  String?  // The extracted JSON data
+
+  error       String?  // Error message if failed
+
+  tokenCount  Int?     // Approximate token count
+  durationMs  Int?     // How long the phase took
+
+  createdAt   DateTime @default(now())
+
+  @@index([campaignId])
+  @@index([phase])
+  @@index([createdAt])
+}
+
+// ============================================================
+// SOUL MIRROR QUIZ SYSTEM
+// Personality-driven D&D character generator
+// ============================================================
+
+model QuizQuestion {
+  id          String   @id @default(uuid())
+  text        String
+  category    String   // fantasy_scenario, real_life, dnd_hypothetical
+  dimension   String   // O, C, E, A, N (primary Big Five dimension tested)
+  answers     String   // JSON: [{text, scores: {O?, C?, E?, A?, N?}, classHints?, raceHints?}]
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  
+  @@index([category])
+  @@index([dimension])
+}
+
+model QuizSession {
+  id               String      @id @default(uuid())
+  campaignId       String
+  campaign         Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  
+  // Quiz state
+  usedQuestionIds  String      @default("[]")  // JSON array of question IDs
+  currentIndex     Int         @default(0)
+  totalQuestions   Int         @default(15)
+  
+  // Running Big Five scores (0-100, start at 50)
+  scoreO           Int         @default(50)  // Openness
+  scoreC           Int         @default(50)  // Conscientiousness
+  scoreE           Int         @default(50)  // Extraversion
+  scoreA           Int         @default(50)  // Agreeableness
+  scoreN           Int         @default(50)  // Neuroticism
+  
+  status           String      @default("in_progress")  // in_progress, completed, abandoned
+  completedAt      DateTime?
+  
+  result           QuizResult?
+  
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  
+  @@index([campaignId])
+  @@index([status])
+}
+
+model QuizResult {
+  id                  String      @id @default(uuid())
+  sessionId           String      @unique
+  session             QuizSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  
+  // Final Big Five scores (0-100)
+  openness            Int
+  conscientiousness   Int
+  extraversion        Int
+  agreeableness       Int
+  neuroticism         Int
+  
+  // Derived D&D attributes
+  alignment           String      // e.g., "Chaotic Good"
+  suggestedRace       String
+  suggestedClass      String
+  suggestedBackground String
+  
+  // AI-generated content
+  backstory           String?
+  personalityTraits   String      @default("[]")  // JSON: ["trait1", "trait2"]
+  ideal               String?
+  bond                String?
+  flaw                String?
+  
+  // Suggested ability scores (JSON for point-buy suggestion)
+  suggestedAbilities  String      @default("{\"strength\":10,\"dexterity\":10,\"constitution\":10,\"intelligence\":10,\"wisdom\":10,\"charisma\":10}")
+  
+  // Share functionality
+  shareToken          String?     @unique  // For shareable URL
+  shareImageUrl       String?     // Rendered share card image path
+  
+  createdAt           DateTime    @default(now())
+  
+  @@index([shareToken])
+}
+

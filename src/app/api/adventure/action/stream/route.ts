@@ -144,8 +144,14 @@ export async function POST(request: NextRequest) {
           const updateData: Record<string, unknown> = {};
           if (updates.currentHp !== undefined) updateData.currentHp = updates.currentHp;
           if (updates.tempHp !== undefined) updateData.tempHp = updates.tempHp;
+          if (updates.hitDiceRemaining !== undefined) updateData.hitDiceRemaining = updates.hitDiceRemaining;
           if (updates.conditions !== undefined) updateData.conditions = JSON.stringify(updates.conditions);
-          
+          if (updates.inventory !== undefined) updateData.inventory = JSON.stringify(updates.inventory);
+          if (updates.gold !== undefined) updateData.gold = updates.gold;
+          if (updates.spellSlots !== undefined) updateData.spellSlots = JSON.stringify(updates.spellSlots);
+          if (updates.classResources !== undefined) updateData.classResources = JSON.stringify(updates.classResources);
+          if (updates.equippedItems !== undefined) updateData.equippedItems = JSON.stringify(updates.equippedItems);
+
           if (Object.keys(updateData).length > 0) {
             await prisma.character.update({
               where: { id: charId },

@@ -13,16 +13,11 @@ export const FantasyButton: React.FC<FantasyButtonProps> = ({
 }) => {
     const baseStyles = "relative inline-flex items-center justify-center font-medieval font-bold tracking-wider transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed";
 
+    // Clean buttons with gray/checker removed
     const variants = {
-        primary: "w-48 h-14 text-parchment hover:text-white bg-[url('/ui/button-primary.png')] bg-contain bg-center bg-no-repeat drop-shadow-lg hover:drop-shadow-xl active:scale-95",
-        secondary: "w-40 h-12 text-parchment/80 hover:text-parchment bg-[url('/ui/button-secondary.png')] bg-contain bg-center bg-no-repeat hover:brightness-110 active:scale-95"
+        primary: "min-w-[200px] min-h-[80px] px-12 py-5 text-[#1A1714] bg-[url('/ui/button-primary-clean.png')] bg-[length:100%_100%] bg-center bg-no-repeat bg-transparent border-0 hover:brightness-110 hover:-translate-y-0.5 active:brightness-95 active:translate-y-0.5",
+        secondary: "min-w-[180px] min-h-[72px] px-10 py-4 text-parchment bg-[url('/ui/button-secondary-clean.png')] bg-[length:100%_100%] bg-center bg-no-repeat bg-transparent border-0 hover:brightness-110 hover:-translate-y-0.5 active:brightness-95 active:translate-y-0.5"
     };
-
-    // If the button images have black backgrounds, we can try to blend them, 
-    // but buttons are tricky because they contain text. 
-    // Ideally, the images are transparent. 
-    // If not, we might need a wrapper. 
-    // For now, assuming standard usage.
 
     return (
         <button

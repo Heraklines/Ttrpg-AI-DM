@@ -51,29 +51,37 @@ body {
   background-image: url('/frames/gold-frame-medium.png');
   background-size: 100% 100%;
   pointer-events: none;
-  /* If the frame has a black background, screen it */
-  mix-blend-mode: screen;
 }
 
 .btn-ornate {
-  background-image: url('/ui/button-primary.png');
+  /* Clean button with gray/checker removed */
+  background-image: url('/ui/button-primary-clean.png');
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
+  background-color: transparent;
+  border: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: #F4E4BC;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
-  transition: filter 0.2s;
+  color: #1A1714;
+  font-weight: bold;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: filter 0.2s, transform 0.2s;
+  min-width: 200px;
+  min-height: 80px;
+  padding: 20px 48px;
+  position: relative;
 }
 
 .btn-ornate:hover {
-  filter: brightness(1.2);
+  filter: brightness(1.1);
+  transform: translateY(-1px);
 }
 
 .btn-ornate:active {
-  filter: brightness(0.9);
+  filter: brightness(0.95);
+  transform: translateY(1px);
 }
 
 .glow-text {
@@ -91,4 +99,515 @@ h6 {
 
 .narrative-text {
   font-family: 'Crimson Text', serif;
+}
+
+/* Soul Mirror Quiz Animations */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes sparkle {
+
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
+}
+
+.animate-sparkle {
+  animation: sparkle 2s ease-in-out infinite;
+}
+
+.shimmer-text {
+  background: linear-gradient(90deg, var(--color-primary) 0%, #D4B36A 50%, var(--color-primary) 100%);
+  background-size: 2000px 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+
+/* Soul Mirror button styles */
+.btn-soul-mirror {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(196, 163, 90, 0.2) 0%, rgba(30, 77, 107, 0.2) 100%);
+  border: 2px solid var(--color-primary);
+  transition: all 0.3s ease;
+}
+
+.btn-soul-mirror::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(196, 163, 90, 0.3) 0%, transparent 70%);
+  animation: spin-slow 10s linear infinite;
+  pointer-events: none;
+}
+
+.btn-soul-mirror:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 30px rgba(196, 163, 90, 0.4);
+  border-color: var(--color-primary);
+}
+
+/* ==========================================
+   SCROLLABLE TEXT CONTAINERS
+   Use these for long text content to prevent
+   excessive page scrolling
+   ========================================== */
+
+/* Scrollable container for backstory/description text */
+.scroll-container {
+  max-height: 200px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary) var(--color-surface);
+}
+
+.scroll-container-sm {
+  max-height: 120px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary) var(--color-surface);
+}
+
+.scroll-container-md {
+  max-height: 250px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary) var(--color-surface);
+}
+
+.scroll-container-lg {
+  max-height: 350px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-primary) var(--color-surface);
+}
+
+/* Webkit scrollbar styling */
+.scroll-container::-webkit-scrollbar,
+.scroll-container-sm::-webkit-scrollbar,
+.scroll-container-md::-webkit-scrollbar,
+.scroll-container-lg::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scroll-container::-webkit-scrollbar-track,
+.scroll-container-sm::-webkit-scrollbar-track,
+.scroll-container-md::-webkit-scrollbar-track,
+.scroll-container-lg::-webkit-scrollbar-track {
+  background: var(--color-surface);
+  border-radius: 4px;
+}
+
+.scroll-container::-webkit-scrollbar-thumb,
+.scroll-container-sm::-webkit-scrollbar-thumb,
+.scroll-container-md::-webkit-scrollbar-thumb,
+.scroll-container-lg::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 4px;
+  border: 2px solid var(--color-surface);
+}
+
+.scroll-container::-webkit-scrollbar-thumb:hover,
+.scroll-container-sm::-webkit-scrollbar-thumb:hover,
+.scroll-container-md::-webkit-scrollbar-thumb:hover,
+.scroll-container-lg::-webkit-scrollbar-thumb:hover {
+  background: #D4B36A;
+}
+
+/* Text that fades at the bottom to indicate more content */
+.scroll-fade {
+  position: relative;
+}
+
+.scroll-fade::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 8px; /* Account for scrollbar */
+  height: 30px;
+  background: linear-gradient(transparent, var(--color-surface));
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.scroll-fade:not(:hover)::after {
+  opacity: 1;
+}
+
+/* ==========================================
+   FANTASY RPG PIXEL-ART DESIGN SYSTEM
+   Dreamy Victorian pixel-art aesthetic
+   ========================================== */
+
+/* Import pixel fonts */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Pixelify+Sans:wght@400;500;600;700&display=swap');
+
+/* === SNES-STYLE BEVEL BORDERS === */
+.bevel-outset {
+  border: 3px solid;
+  border-color: #fadd92 #5a4313 #5a4313 #fadd92;
+}
+
+.bevel-inset {
+  border: 3px solid;
+  border-color: #5a4313 #fadd92 #fadd92 #5a4313;
+}
+
+.bevel-outset-thick {
+  border: 4px solid;
+  border-color: #fadd92 #5a4313 #5a4313 #fadd92;
+}
+
+/* === DITHERED BACKGROUNDS === */
+.bg-void-dither {
+  background-color: #1a0b1c;
+  background-image: radial-gradient(#2a1d17 1px, transparent 1px);
+  background-size: 4px 4px;
+}
+
+.bg-parchment-grain {
+  position: relative;
+}
+
+.bg-parchment-grain::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+  pointer-events: none;
+  mix-blend-mode: overlay;
+}
+
+/* === DREAMY CLOUD/SKY GRADIENT === */
+.bg-fantasy-sky {
+  background: linear-gradient(
+    180deg,
+    #2d1f3d 0%,
+    #4a3256 20%,
+    #6b4a6e 40%,
+    #8b6b8a 60%,
+    #c4a0b0 80%,
+    #e8d4d0 100%
+  );
+}
+
+.bg-fantasy-sky-warm {
+  background: linear-gradient(
+    180deg,
+    #05080a 0%,
+    #080c10 10%,
+    #0c1218 20%,
+    #101820 35%,
+    #182028 50%,
+    #202830 65%,
+    #384048 80%,
+    #586068 92%,
+    #808890 100%
+  );
+}
+
+/* === STARFIELD / SPARKLE ELEMENTS === */
+.star {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  background: #fadd92;
+  border-radius: 50%;
+  box-shadow: 0 0 6px 2px rgba(250, 221, 146, 0.6);
+}
+
+.star-sm {
+  width: 2px;
+  height: 2px;
+  box-shadow: 0 0 4px 1px rgba(250, 221, 146, 0.4);
+}
+
+.star-lg {
+  width: 6px;
+  height: 6px;
+  box-shadow: 0 0 10px 3px rgba(250, 221, 146, 0.8);
+}
+
+/* === PIXEL-ART MOON === */
+.pixel-moon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, #fadd92 0%, #c69c48 50%, #7a5923 100%);
+  border-radius: 50%;
+  box-shadow: 
+    0 0 30px 10px rgba(250, 221, 146, 0.4),
+    0 0 60px 20px rgba(250, 221, 146, 0.2),
+    inset -10px -10px 20px rgba(90, 67, 19, 0.5);
+  image-rendering: pixelated;
+}
+
+/* === PIXEL CLOUD SHAPES === */
+.pixel-cloud {
+  background: linear-gradient(135deg, rgba(232, 212, 208, 0.9) 0%, rgba(196, 160, 176, 0.7) 100%);
+  border-radius: 999px;
+  filter: blur(0.5px);
+  image-rendering: pixelated;
+}
+
+/* === ORNATE GOLD DIVIDERS === */
+.divider-ornate {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.divider-ornate::before,
+.divider-ornate::after {
+  content: '';
+  flex: 1;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #c69c48, transparent);
+}
+
+/* === PIXEL-ART PANEL === */
+.pixel-panel {
+  background-color: #e8dcca;
+  border: 4px solid;
+  border-color: #fadd92 #5a4313 #5a4313 #fadd92;
+  box-shadow: 
+    4px 4px 0 rgba(0,0,0,0.5),
+    inset 2px 2px 0 rgba(255,255,255,0.3),
+    inset -2px -2px 0 rgba(0,0,0,0.1);
+  image-rendering: pixelated;
+}
+
+.pixel-panel-dark {
+  background-color: #2a1d17;
+  border: 4px solid;
+  border-color: #c69c48 #5a4313 #5a4313 #c69c48;
+  box-shadow: 
+    4px 4px 0 rgba(0,0,0,0.7),
+    inset 0 0 20px rgba(0,0,0,0.5);
+}
+
+/* === FANTASY BUTTON STYLES === */
+.btn-pixel {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 16px 24px;
+  background-color: #c69c48;
+  color: #1a0b1c;
+  border: 3px solid;
+  border-color: #fadd92 #5a4313 #5a4313 #fadd92;
+  cursor: pointer;
+  transition: transform 50ms, filter 100ms;
+  image-rendering: pixelated;
+}
+
+.btn-pixel:hover {
+  background-color: #d4aa58;
+  filter: brightness(1.1);
+}
+
+.btn-pixel:active {
+  transform: translate(1px, 1px);
+  filter: brightness(0.95);
+  border-color: #5a4313 #fadd92 #fadd92 #5a4313;
+}
+
+.btn-pixel-secondary {
+  background-color: #1e2832;
+  color: #b8a878;
+  border-color: #3a4450 #101418 #101418 #3a4450;
+}
+
+.btn-pixel-secondary:hover {
+  background-color: #283240;
+}
+
+.btn-pixel-danger {
+  background-color: #2a3848;
+  color: #d4c090;
+  border-color: #4a5868 #1a2028 #1a2028 #4a5868;
+}
+
+.btn-pixel-danger:hover {
+  background-color: #3a4858;
+}
+
+/* === SCANLINE OVERLAY === */
+.scanlines::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0, 0, 0, 0.1) 2px,
+    rgba(0, 0, 0, 0.1) 4px
+  );
+  pointer-events: none;
+  z-index: 100;
+}
+
+/* === CORNER FLOURISHES === */
+.corner-flourish {
+  position: relative;
+}
+
+.corner-flourish::before,
+.corner-flourish::after {
+  content: '✦';
+  position: absolute;
+  color: #c69c48;
+  font-size: 16px;
+  text-shadow: 0 0 10px rgba(198, 156, 72, 0.5);
+}
+
+.corner-flourish::before {
+  top: 8px;
+  left: 8px;
+}
+
+.corner-flourish::after {
+  bottom: 8px;
+  right: 8px;
+}
+
+/* === PIXEL TEXT STYLING === */
+.text-pixel {
+  font-family: 'Press Start 2P', monospace;
+  image-rendering: pixelated;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.text-retro {
+  font-family: 'VT323', monospace;
+  letter-spacing: 0.05em;
+}
+
+/* === GOLD GLOW TEXT === */
+.text-gold-glow {
+  color: #fadd92;
+  text-shadow: 
+    0 0 10px rgba(250, 221, 146, 0.5),
+    0 0 20px rgba(198, 156, 72, 0.3),
+    2px 2px 0 #5a4313;
+}
+
+/* === MAGIC SHIMMER TEXT === */
+.text-magic-shimmer {
+  background: linear-gradient(
+    90deg, 
+    #c69c48 0%, 
+    #fadd92 25%, 
+    #c69c48 50%, 
+    #fadd92 75%, 
+    #c69c48 100%
+  );
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+
+/* === REDUCED MOTION === */
+@media (prefers-reduced-motion: reduce) {
+  .animate-twinkle,
+  .animate-twinkle-delayed,
+  .animate-float,
+  .animate-glow-pulse,
+  .animate-drift {
+    animation: none !important;
+  }
+  
+  .text-magic-shimmer {
+    animation: none;
+    background: #fadd92;
+    -webkit-text-fill-color: #fadd92;
+  }
+}
+
+/* === SHOOTING STAR ANIMATION === */
+@keyframes shootingStar {
+  0% {
+    transform: translate(0, 0) rotate(35deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(150px, 100px) rotate(35deg);
+    opacity: 0;
+  }
+}
+
+/* === GHOST SHIP ANIMATIONS === */
+@keyframes ghostShipDrift {
+  0% {
+    transform: translateX(100vw);
+  }
+  100% {
+    transform: translateX(-150px);
+  }
+}
+
+@keyframes ghostShipDriftReverse {
+  0% {
+    transform: translateX(-150px) scaleX(-1);
+  }
+  100% {
+    transform: translateX(100vw) scaleX(-1);
+  }
+}
+
+@keyframes ghostShipFade {
+  0% {
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.7;
+  }
+  90% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+  }
 }
